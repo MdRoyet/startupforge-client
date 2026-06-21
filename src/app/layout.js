@@ -1,6 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Providers } from "./providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -14,7 +13,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Updated to match the naming convention in A10_CAT-002.docx[cite: 1]
 export const metadata = {
   title: "StartupForge — Startup Team Builder Platform",
   description:
@@ -28,16 +26,14 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-gray-900 selection:bg-indigo-500 selection:text-white">
-        <Providers>
-          {/* Top Navigation Bar[cite: 1] */}
-          <Navbar />
+        {/* Top Navigation Bar */}
+        <Navbar />
 
-          {/* Main Content Area (flex-grow ensures the footer is pushed to the bottom) */}
-          <main className="flex-grow">{children}</main>
+        {/* Main Content Area */}
+        <main className="flex-grow">{children}</main>
 
-          {/* Sticky Bottom Footer[cite: 1] */}
-          <Footer />
-        </Providers>
+        {/* Sticky Bottom Footer */}
+        <Footer />
       </body>
     </html>
   );

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; // Use next/link if using Next.js
 import {

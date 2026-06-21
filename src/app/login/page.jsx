@@ -2,28 +2,61 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Loading state added
 
-  const handleLogin = (e) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Better Auth integration will go here
-    console.log("Login Attempt:", { email, password });
+    setIsLoading(true);
+
+    try {
+      // TODO: In Phase 2, await BetterAuth login success here
+      // Simulating a network request delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      toast.success("Welcome back! Logging you in...");
+
+      // Feature requirement: Redirect to intended route OR Home page
+      const intendedRoute = searchParams.get("redirect");
+      if (intendedRoute) {
+        router.push(intendedRoute);
+      } else {
+        router.push("/");
+      }
+    } catch (error) {
+      toast.error("Invalid email or password. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleGoogleLogin = () => {
-    // Better Auth Google Login
-    console.log("Initiating Google Login...");
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      // Simulating network request
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      toast.success("Google login successful!");
+      router.push("/");
+    } catch (error) {
+      toast.error("Google authentication failed.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex w-full bg-slate-950 font-sans">
-      {/* Left Column: Visual/Brand Side (Hidden on mobile) */}
+      {/* Left Column: Visual/Brand Side */}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950 items-center justify-center">
-        {/* Animated Background Elements */}
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-secondary/20 rounded-full blur-[150px] mix-blend-screen" />
 
@@ -114,6 +147,7 @@ export default function LoginPage() {
                     placeholder="you@startupforge.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -156,17 +190,23 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
               </div>
 
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                whileTap={{ scale: isLoading ? 1 : 0.98 }}
                 type="submit"
-                className="btn btn-primary w-full shadow-lg shadow-primary/20 h-12 text-lg"
+                disabled={isLoading}
+                className="btn btn-primary w-full shadow-lg shadow-primary/20 h-12 text-lg disabled:opacity-70 disabled:text-primary-content"
               >
-                Sign In
+                {isLoading ? (
+                  <span className="loading loading-spinner loading-md"></span>
+                ) : (
+                  "Sign In"
+                )}
               </motion.button>
             </form>
 
@@ -184,9 +224,10 @@ export default function LoginPage() {
 
               <div className="mt-6">
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
                   onClick={handleGoogleLogin}
+                  disabled={isLoading}
                   className="btn btn-outline w-full h-12 flex items-center gap-3 border-base-300 hover:bg-base-200 text-base-content"
                 >
                   <svg

@@ -2,14 +2,18 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    role: "Collaborator", // Default role
+    role: "Collaborator",
     image: null,
   });
 
@@ -19,7 +23,6 @@ export default function RegisterPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Real-time password validation logic based on requirements
     if (name === "password") {
       const hasUppercase = /[A-Z]/.test(value);
       const hasLowercase = /[a-z]/.test(value);
@@ -36,14 +39,35 @@ export default function RegisterPage() {
   };
 
   const handleImageChange = (e) => {
-    // In Phase 2, this will hit ImgBB API
     setFormData((prev) => ({ ...prev, image: e.target.files[0] }));
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    if (passwordError) return;
-    console.log("Registration Data:", formData);
+
+    if (passwordError) {
+      toast.error("Please fix the errors in your password.");
+      return;
+    }
+
+    if (!formData.image) {
+      toast.warning("Please upload a profile picture.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Simulating API request (ImgBB upload + DB Save)
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      toast.success("Account created successfully! Welcome aboard.");
+      router.push("/dashboard"); // Redirect to dashboard on success
+    } catch (error) {
+      toast.error("Failed to create account. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -86,13 +110,11 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleRegister} className="space-y-6">
-            {/* Role Selection */}
-            <div className="space-y-3">
-              <label className="label-text font-semibold text-base-content/80">
+            <div className="space-y-4">
+              <label className="label-text font-semibold text-base-content/80 block mb-4 text-lg ">
                 I am joining as a...
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Founder Option */}
                 <label
                   className={`cursor-pointer border-2 rounded-2xl p-4 transition-all ${formData.role === "Founder" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-primary/50"}`}
                 >
@@ -103,6 +125,7 @@ export default function RegisterPage() {
                       value="Founder"
                       checked={formData.role === "Founder"}
                       onChange={handleChange}
+                      disabled={isLoading}
                       className="radio radio-primary"
                     />
                     <div className="flex items-center gap-3">
@@ -133,7 +156,6 @@ export default function RegisterPage() {
                   </div>
                 </label>
 
-                {/* Collaborator Option */}
                 <label
                   className={`cursor-pointer border-2 rounded-2xl p-4 transition-all ${formData.role === "Collaborator" ? "border-secondary bg-secondary/5" : "border-base-300 bg-base-100 hover:border-secondary/50"}`}
                 >
@@ -144,6 +166,7 @@ export default function RegisterPage() {
                       value="Collaborator"
                       checked={formData.role === "Collaborator"}
                       onChange={handleChange}
+                      disabled={isLoading}
                       className="radio radio-secondary"
                     />
                     <div className="flex items-center gap-3">
@@ -188,9 +211,10 @@ export default function RegisterPage() {
                   type="text"
                   name="name"
                   required
-                  className="input input-bordered w-full focus:ring-2 focus:ring-primary/50 bg-base-200/50"
+                  className="input input-bordered w-full focus:ring-2 focus:ring-primary/50 bg-base-200/50 text-base-content placeholder:text-base-content/40 font-medium"
                   placeholder="Jane Doe"
                   onChange={handleChange}
+                  disabled={isLoading}
                 />
               </div>
               <div className="form-control w-full">
@@ -203,14 +227,14 @@ export default function RegisterPage() {
                   type="email"
                   name="email"
                   required
-                  className="input input-bordered w-full focus:ring-2 focus:ring-primary/50 bg-base-200/50"
+                  className="input input-bordered w-full focus:ring-2 focus:ring-primary/50 bg-base-200/50 text-base-content placeholder:text-base-content/40 font-medium"
                   placeholder="jane@example.com"
                   onChange={handleChange}
+                  disabled={isLoading}
                 />
               </div>
             </div>
 
-            {/* Profile Image Upload */}
             <div className="form-control w-full">
               <label className="label">
                 <span className="label-text font-semibold text-base-content/80">
@@ -225,11 +249,11 @@ export default function RegisterPage() {
                 required
                 accept="image/*"
                 onChange={handleImageChange}
-                className="file-input file-input-bordered file-input-primary w-full bg-base-200/50"
+                disabled={isLoading}
+                className="file-input file-input-bordered file-input-primary w-full bg-base-200/50 text-base-content font-medium"
               />
             </div>
 
-            {/* Password Validation Implementation */}
             <div className="form-control w-full">
               <label className="label">
                 <span className="label-text font-semibold text-base-content/80">
@@ -240,8 +264,9 @@ export default function RegisterPage() {
                 type="password"
                 name="password"
                 required
-                className={`input input-bordered w-full focus:ring-2 transition-shadow bg-base-200/50 ${passwordError ? "input-error focus:ring-error/50" : "focus:ring-primary/50"}`}
-                placeholder="Create a strong password"
+                disabled={isLoading}
+                className={`input input-bordered w-full focus:ring-2 transition-shadow bg-base-200/50 text-base-content placeholder:text-base-content/40 tracking-widest ${passwordError ? "input-error focus:ring-error/50" : "focus:ring-primary/50"}`}
+                placeholder="••••••••"
                 onChange={handleChange}
               />
               {passwordError && (
@@ -270,13 +295,23 @@ export default function RegisterPage() {
 
             <div className="pt-4">
               <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
+                whileHover={{
+                  scale:
+                    isLoading || passwordError || !formData.password ? 1 : 1.01,
+                }}
+                whileTap={{
+                  scale:
+                    isLoading || passwordError || !formData.password ? 1 : 0.99,
+                }}
                 type="submit"
-                disabled={!!passwordError || !formData.password}
+                disabled={!!passwordError || !formData.password || isLoading}
                 className="btn btn-primary w-full shadow-lg shadow-primary/20 h-14 text-lg rounded-xl disabled:bg-base-300 disabled:text-base-content/40 disabled:shadow-none"
               >
-                Create Account
+                {isLoading ? (
+                  <span className="loading loading-spinner loading-md"></span>
+                ) : (
+                  "Create Account"
+                )}
               </motion.button>
             </div>
           </form>

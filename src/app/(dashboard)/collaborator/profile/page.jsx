@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import toast from "react-toastify";
+import { toast } from "react-toastify";
 
 const SvgUser = () => (
   <svg
@@ -113,7 +113,7 @@ const Profile = () => {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="max-w-4xl mx-auto"
+      className="max-w-4xl mx-auto pt-40"
     >
       <motion.div variants={itemVariants} className="mb-8">
         <div className="flex items-center gap-4 mb-2">

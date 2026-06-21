@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import CollaboratorSidebar from "@/components/dashboard/CollaboratorSidebar";
 import { ToastContainer } from "react-toastify";

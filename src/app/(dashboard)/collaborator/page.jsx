@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import toast from "react-toastify";
+import { toast } from "react-toastify";
 import Link from "next/link";
 
 const SvgSend = () => (
@@ -198,7 +198,7 @@ const CollaboratorOverview = () => {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="max-w-7xl mx-auto space-y-8"
+      className="max-w-7xl mx-auto space-y-8 pt-30 px-4 sm:px-6 lg:px-8 pb-12"
     >
       <motion.div
         variants={itemVariants}

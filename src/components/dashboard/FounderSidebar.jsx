@@ -2,8 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useSession, signOut } from "@/lib/auth-client";
+import { toast } from "react-toastify";
 import {
   Briefcase,
   LayoutHeaderCursor,
@@ -15,6 +17,9 @@ import {
 
 const FounderSidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   // Founder navigation links
   const navLinks = [
@@ -53,6 +58,13 @@ const FounderSidebar = () => {
   const isActive = (path) => {
     if (path === "/founder") return pathname === "/founder";
     return pathname?.startsWith(path);
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    toast.success("Logged out successfully.");
+    router.push("/login");
+    router.refresh();
   };
 
   return (
@@ -143,12 +155,14 @@ const FounderSidebar = () => {
         </div>
       </div>
 
-      {/* User Profile / Logout Section */}
+      {/* User Profile / Logout Section (Matches image_103dea.png perfectly) */}
       <div className="p-4 border-t border-white/10 bg-black/20">
         <div className="flex items-center gap-3 mb-3">
           <div className="relative">
             <img
-              src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+              src={
+                user?.image || "https://i.pravatar.cc/150?u=a042581f4e29026704d"
+              }
               alt="User Avatar"
               className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/50"
             />
@@ -156,15 +170,18 @@ const FounderSidebar = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-white truncate">
-              Alex Morgan
+              {user?.name || "Loading..."}
             </p>
             <p className="text-xs text-white/40 truncate">
-              alex@startupforge.com
+              {user?.email || ""}
             </p>
           </div>
         </div>
 
-        <button className="w-full flex items-center justify-center gap-2 py-2 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors duration-200">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 py-2 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors duration-200"
+        >
           <ArrowRightFromSquare width={14} height={14} />
           Sign Out
         </button>

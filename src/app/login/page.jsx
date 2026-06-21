@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { signIn } from "@/lib/auth-client"; // Imported directly
+import { signIn } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -32,6 +32,8 @@ export default function LoginPage() {
       }
 
       toast.success("Welcome back! Logging you in...");
+
+      router.refresh(); // Syncs session cleanly to global layout layout
 
       const intendedRoute = searchParams.get("redirect");
       if (intendedRoute) {

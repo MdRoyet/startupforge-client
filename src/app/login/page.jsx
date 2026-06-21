@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { signIn } from "@/lib/auth-client"; // Imported directly
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Loading state added
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,13 +20,19 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // TODO: In Phase 2, await BetterAuth login success here
-      // Simulating a network request delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const { data, error } = await signIn.email({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast.error(error.message || "Invalid email or password.");
+        setIsLoading(false);
+        return;
+      }
 
       toast.success("Welcome back! Logging you in...");
 
-      // Feature requirement: Redirect to intended route OR Home page
       const intendedRoute = searchParams.get("redirect");
       if (intendedRoute) {
         router.push(intendedRoute);
@@ -33,7 +40,7 @@ export default function LoginPage() {
         router.push("/");
       }
     } catch (error) {
-      toast.error("Invalid email or password. Please try again.");
+      toast.error("An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -42,12 +49,16 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      // Simulating network request
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      toast.success("Google login successful!");
-      router.push("/");
+      const { data, error } = await signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+
+      if (error) {
+        toast.error(error.message || "Google authentication failed.");
+      }
     } catch (error) {
-      toast.error("Google authentication failed.");
+      toast.error("An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -143,7 +154,7 @@ export default function LoginPage() {
                   <input
                     type="email"
                     required
-                    className="input input-bordered w-full pl-10 focus:ring-2 focus:ring-primary/50 transition-shadow bg-base-200/50"
+                    className="input input-bordered w-full pl-10 focus:ring-2 focus:ring-primary/50 transition-shadow bg-base-200/50 text-base-content placeholder:text-base-content/40"
                     placeholder="you@startupforge.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -186,7 +197,7 @@ export default function LoginPage() {
                   <input
                     type="password"
                     required
-                    className="input input-bordered w-full pl-10 focus:ring-2 focus:ring-primary/50 transition-shadow bg-base-200/50"
+                    className="input input-bordered w-full pl-10 focus:ring-2 focus:ring-primary/50 transition-shadow bg-base-200/50 text-base-content placeholder:text-base-content/40 tracking-widest"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}

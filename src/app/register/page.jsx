@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { signUp } from "@/lib/auth-client"; // Imported directly
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -58,13 +59,47 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // Simulating API request (ImgBB upload + DB Save)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // 1. Upload the image to ImgBB first
+      toast.info("Uploading profile picture...", { autoClose: 1500 });
+
+      const imageUploadData = new FormData();
+      imageUploadData.append("image", formData.image);
+
+      const imgResponse = await fetch(process.env.NEXT_PUBLIC_API_IMAGES_URL, {
+        method: "POST",
+        body: imageUploadData,
+      });
+
+      const imgData = await imgResponse.json();
+
+      if (!imgData.success) {
+        throw new Error("Failed to upload image. Please try a different file.");
+      }
+
+      const uploadedImageUrl = imgData.data.display_url;
+
+      // 2. Register the user with Better Auth using the real image URL
+      toast.info("Creating your account...", { autoClose: 1500 });
+
+      const { data, error } = await signUp.email({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        image: uploadedImageUrl, // Real ImgBB URL
+        role: formData.role, // Custom role mapping
+      });
+
+      if (error) {
+        toast.error(error.message || "Failed to create account.");
+        setIsLoading(false);
+        return;
+      }
 
       toast.success("Account created successfully! Welcome aboard.");
-      router.push("/dashboard"); // Redirect to dashboard on success
+      router.push("/login");
     } catch (error) {
-      toast.error("Failed to create account. Please try again.");
+      console.error("Registration Error:", error);
+      toast.error(error.message || "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -110,8 +145,8 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleRegister} className="space-y-6">
-            <div className="space-y-4">
-              <label className="label-text font-semibold text-base-content/80 block mb-4 text-lg ">
+            <div className="mb-2">
+              <label className="label-text font-semibold text-base-content/80 block mb-4 text-lg">
                 I am joining as a...
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -318,7 +353,7 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right Column: Dynamic Visual Side (Hidden on mobile) */}
+      {/* Right Column: Dynamic Visual Side */}
       <div className="hidden lg:flex w-[40%] bg-slate-900 relative overflow-hidden flex-col justify-between p-12">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-transparent"></div>

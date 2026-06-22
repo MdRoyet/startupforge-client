@@ -115,20 +115,18 @@ const SvgArrowUp = () => (
     <polyline points="7 7 17 7 17 17" />
   </svg>
 );
-const SvgEmptyBox = () => (
+const SvgSparkles = () => (
   <svg
-    width="48"
-    height="48"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.5"
+    strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-    <line x1="12" y1="22.08" x2="12" y2="12" />
+    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
   </svg>
 );
 
@@ -161,11 +159,12 @@ const CollaboratorOverview = () => {
     totalApplied: 0,
     totalAccepted: 0,
     totalPending: 0,
+    plan: "Free", // Default layout tier fallback parameters
   });
   const [recentActivity, setRecentActivity] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
+  const [upgrading, setUpgrading] = useState(false);
 
-  // Extract first name dynamically from auth context
   const firstName = user?.name ? user.name.split(" ")[0] : "User";
 
   // --- SYNC LIVE ANALYTICS DATA STREAMS ---
@@ -186,7 +185,6 @@ const CollaboratorOverview = () => {
 
         if (mJson.success) setMetrics(mJson.data);
         if (aJson.success) {
-          // Isolate top 3 most recent entries for summary card feed
           setRecentActivity(aJson.data.slice(0, 3));
         }
       } catch (err) {
@@ -203,6 +201,14 @@ const CollaboratorOverview = () => {
       setPageLoading(false);
     }
   }, [user, sessionLoading]);
+
+  // --- DYNAMIC PLAN CEILING RESOLUTION LOGIC ---
+  const isProPlan = metrics.plan === "Pro";
+  const applicationLimit = isProPlan ? 100 : 3;
+  const usagePercentage = Math.min(
+    Math.round((metrics.totalApplied / applicationLimit) * 100),
+    100,
+  );
 
   // Compute platform validation score allocation metrics mapping layout
   const matchRate =
@@ -245,6 +251,42 @@ const CollaboratorOverview = () => {
       textColor: "text-violet-600",
     },
   ];
+
+  // --- STRIPE DESK CHECKOUT ENGINE DISPATCH TRACE ---
+  const handleUpgradeToPro = async () => {
+    if (!user?.email) {
+      toast.error(
+        "Authentication Context Error: Active user email parameter is missing.",
+      );
+      return;
+    }
+
+    setUpgrading(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "collaborator",
+          email: user?.email, // 👈 PASSING LOGGED-IN EMAIL TO NEXT.JS API
+        }),
+      });
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || "Fulfillment token parsing failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err.message || "Failed to initialize stripe billing portal window.",
+      );
+    } finally {
+      setUpgrading(false);
+    }
+  };
 
   if (sessionLoading || pageLoading) {
     return (
@@ -385,27 +427,62 @@ const CollaboratorOverview = () => {
           </div>
         </motion.div>
 
-        {/* Right Subsection Grid Segment: Interactive Pro Tip Action Component Card */}
+        {/* Right Subsection Grid Segment: Upgraded Application Usage Allocation Card */}
         <motion.div
           variants={itemVariants}
-          className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl shadow-xl p-6 text-white relative overflow-hidden h-fit flex flex-col justify-between"
+          className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl shadow-xl p-6 text-white relative overflow-hidden h-fit flex flex-col justify-between space-y-6"
         >
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-2xl" />
-          <div>
-            <h3 className="font-black mb-2 relative z-10 text-base flex items-center gap-1.5">
-              Pro Tip 💡
-            </h3>
-            <p className="text-xs font-medium text-blue-200/80 leading-relaxed mb-6 relative z-10">
-              Startups love candidates who attach a portfolio link. Make sure
-              yours is up to date inside your account panel configurations!
-            </p>
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl" />
+
+          <div className="relative z-10 space-y-4">
+            <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs uppercase tracking-wider">
+              <SvgSparkles />
+              <span>Ecosystem Plan Thresholds</span>
+            </div>
+
+            <div>
+              <h3 className="font-black text-lg text-white">
+                {isProPlan ? "Forge Premium Account" : "Standard Free Account"}
+              </h3>
+              <p className="text-xs text-blue-200/70 mt-1 leading-relaxed">
+                {isProPlan
+                  ? "Absolute system scale clearance unlocked. Enjoy priority dispatch options on all submitted co-founder requests."
+                  : "Upgrade your profile status parameters to instantly unlock an application quota expansion up to 100 openings."}
+              </p>
+            </div>
+
+            {/* Dynamic Usage Meter Progress Bar Bar */}
+            <div className="pt-2">
+              <div className="flex justify-between text-[11px] font-bold font-mono mb-1.5">
+                <span className="text-blue-200">APPLICATION_USAGE</span>
+                <span className="text-white">
+                  {metrics.totalApplied} / {applicationLimit} Roles
+                </span>
+              </div>
+              <div className="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${usagePercentage}%` }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  className="bg-gradient-to-r from-amber-400 to-orange-500 h-full rounded-full"
+                />
+              </div>
+            </div>
           </div>
-          <button
-            onClick={() => router.push("/collaborator/profile")}
-            className="w-full py-2.5 bg-white/10 border border-white/20 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition-all relative z-10 uppercase tracking-tight"
-          >
-            Update Profile
-          </button>
+
+          {!isProPlan && (
+            <button
+              onClick={handleUpgradeToPro}
+              disabled={upgrading}
+              className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:from-slate-800 disabled:to-slate-900 disabled:text-slate-500 text-slate-950 text-xs font-black rounded-xl transition-all relative z-10 uppercase tracking-wider shadow-md hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center min-h-[44px]"
+            >
+              {upgrading ? (
+                <span className="loading loading-spinner loading-xs text-slate-950"></span>
+              ) : (
+                "Upgrade to Pro Status"
+              )}
+            </button>
+          )}
         </motion.div>
       </div>
     </motion.div>

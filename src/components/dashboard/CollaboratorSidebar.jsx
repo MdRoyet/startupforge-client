@@ -245,7 +245,7 @@ const CollaboratorSidebar = () => {
         })}
 
         {/* --- DYNAMIC INTERACTIVE "UPGRADE TO PRO" BANNER ELEMENT --- */}
-        <div className="pt-6 px-2">
+        {/* <div className="pt-6 px-2">
           <div className="bg-gradient-to-br from-amber-500/10 via-orange-600/5 to-transparent border border-amber-500/20 rounded-2xl p-4 relative overflow-hidden group">
             <div className="absolute top-[-20px] right-[-20px] w-16 h-16 bg-amber-500/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500" />
             <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider mb-1">
@@ -266,7 +266,7 @@ const CollaboratorSidebar = () => {
               Upgrade to Pro Status
             </button>
           </div>
-        </div>
+        </div> */}
       </nav>
 
       {/* --- DYNAMIC PROFILE FOOTER FRAME --- */}

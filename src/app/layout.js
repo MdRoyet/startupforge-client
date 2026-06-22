@@ -29,7 +29,9 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col bg-white text-gray-900 selection:bg-indigo-500 selection:text-white">
         <Navbar></Navbar>
+
         <main className="flex-grow">{children}</main>
+
         <Footer />
 
         {/* Global Toast Container */}

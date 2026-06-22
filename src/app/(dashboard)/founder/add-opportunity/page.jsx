@@ -21,24 +21,6 @@ const SvgHeaderIcon = () => (
     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
   </svg>
 );
-
-const SvgPlus = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
-  </svg>
-);
-
 const SvgX = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +37,6 @@ const SvgX = () => (
     <line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
-
 const SvgSend = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -73,18 +54,15 @@ const SvgSend = () => (
   </svg>
 );
 
-// --- Framer Motion Variants ---
 const containerVariants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
-
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-// --- Main Component ---
 const AddOpportunity = () => {
   const [formData, setFormData] = useState({
     roleTitle: "",
@@ -93,18 +71,15 @@ const AddOpportunity = () => {
     deadline: "",
     industry: "",
   });
-
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handle standard input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle Skill Tag addition
   const handleKeyDown = (e) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
@@ -113,17 +88,16 @@ const AddOpportunity = () => {
         setSkills((prev) => [...prev, newSkill]);
         setSkillInput("");
       } else if (skills.includes(newSkill)) {
-        toast.warn("Skill already added!");
+        toast.warn("Skill already appended to this list matrix!");
       }
     }
   };
 
-  // Handle Skill Tag removal
   const removeSkill = (indexToRemove) => {
     setSkills((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  // Handle Form Submission
+  // CONNECTED TO BACKEND API ROUTINES
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -134,29 +108,58 @@ const AddOpportunity = () => {
       !formData.deadline ||
       skills.length === 0
     ) {
-      toast.error("Please fill all fields and add at least one skill.");
+      toast.error(
+        "Please fill all fields and add at least one metric tag requirement skill attribute.",
+      );
       return;
     }
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch("http://localhost:5000/api/opportunities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roleTitle: formData.roleTitle,
+          requiredSkills: skills,
+          workType: formData.workType,
+          commitmentLevel: formData.commitmentLevel,
+          deadline: formData.deadline,
+          industry: formData.industry,
+        }),
+      });
 
-    console.log("Submitted Data:", { ...formData, requiredSkills: skills });
+      const result = await response.json();
 
-    toast.success("Opportunity posted successfully! 🚀");
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.error ||
+            "Server validation execution tracking error properties failed.",
+        );
+      }
 
-    // Reset form
-    setFormData({
-      roleTitle: "",
-      workType: "",
-      commitmentLevel: "",
-      deadline: "",
-      industry: "",
-    });
-    setSkills([]);
-    setIsSubmitting(false);
+      toast.success(
+        "Opportunity posted successfully to active talent nodes! 🚀",
+      );
+
+      setFormData({
+        roleTitle: "",
+        workType: "",
+        commitmentLevel: "",
+        deadline: "",
+        industry: "",
+      });
+      setSkills([]);
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error.message ||
+          "Communication loop failure to database collections mapping routes.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -166,7 +169,6 @@ const AddOpportunity = () => {
       animate="show"
       className="max-w-7xl mx-auto space-y-8 pt-24 px-4 sm:px-6 lg:px-8 pb-12"
     >
-      {/* Header Section */}
       <motion.div variants={itemVariants} className="mb-8">
         <div className="flex items-center gap-4 mb-2">
           <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl text-white shadow-lg shadow-blue-500/30">
@@ -183,13 +185,11 @@ const AddOpportunity = () => {
         </div>
       </motion.div>
 
-      {/* Form Card */}
       <motion.form
         variants={itemVariants}
         onSubmit={handleSubmit}
         className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 space-y-8"
       >
-        {/* Role Title - Full Width */}
         <div className="form-control w-full">
           <label className="label">
             <span className="label-text font-semibold text-gray-700">
@@ -202,20 +202,19 @@ const AddOpportunity = () => {
             placeholder="e.g., Senior Frontend Developer"
             value={formData.roleTitle}
             onChange={handleInputChange}
-            className="input input-bordered w-full focus:input-primary transition-all duration-200 bg-gray-50/50 hover:bg-white"
+            className="input input-bordered w-full bg-gray-50/50 hover:bg-white text-gray-800 font-medium"
             required
+            disabled={isSubmitting}
           />
         </div>
 
-        {/* Required Skills - Full Width (Tag Input) */}
         <div className="form-control w-full">
           <label className="label">
             <span className="label-text font-semibold text-gray-700">
               Required Skills <span className="text-error">*</span>
             </span>
           </label>
-
-          <div className="min-h-[48px] input input-bordered w-full flex flex-wrap items-center gap-2 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/30 transition-all bg-gray-50/50 hover:bg-white px-3 py-2">
+          <div className="min-h-[48px] input input-bordered w-full flex flex-wrap items-center gap-2 focus-within:ring-2 focus-within:ring-primary/30 transition-all bg-gray-50/50 hover:bg-white px-3 py-2">
             {skills.map((skill, index) => (
               <motion.span
                 key={skill}
@@ -227,13 +226,12 @@ const AddOpportunity = () => {
                 <button
                   type="button"
                   onClick={() => removeSkill(index)}
-                  className="p-0.5 rounded-full hover:bg-blue-200 text-blue-500 hover:text-blue-800 transition-colors"
+                  className="p-0.5 rounded-full hover:bg-blue-200 text-blue-500"
                 >
                   <SvgX />
                 </button>
               </motion.span>
             ))}
-
             <input
               type="text"
               placeholder={
@@ -244,18 +242,18 @@ const AddOpportunity = () => {
               value={skillInput}
               onChange={(e) => setSkillInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 min-w-[150px] bg-transparent border-none outline-none h-8 text-sm placeholder:text-gray-400"
+              className="flex-1 min-w-[150px] bg-transparent border-none outline-none h-8 text-sm text-gray-800 placeholder:text-gray-400"
+              disabled={isSubmitting}
             />
           </div>
           <label className="label">
             <span className="label-text-alt text-gray-400">
-              Press Enter or comma to add a skill
+              Press Enter or comma to append structural requirements tokens
             </span>
           </label>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Work Type */}
           <div className="form-control w-full">
             <label className="label">
               <span className="label-text font-semibold text-gray-700">
@@ -266,8 +264,9 @@ const AddOpportunity = () => {
               name="workType"
               value={formData.workType}
               onChange={handleInputChange}
-              className="select select-bordered w-full focus:select-primary transition-all duration-200 bg-gray-50/50 hover:bg-white"
+              className="select select-bordered w-full bg-gray-50/50 hover:bg-white text-gray-800 font-medium"
               required
+              disabled={isSubmitting}
             >
               <option disabled value="">
                 Select work type
@@ -277,8 +276,6 @@ const AddOpportunity = () => {
               <option value="Hybrid">Hybrid</option>
             </select>
           </div>
-
-          {/* Commitment Level */}
           <div className="form-control w-full">
             <label className="label">
               <span className="label-text font-semibold text-gray-700">
@@ -289,8 +286,9 @@ const AddOpportunity = () => {
               name="commitmentLevel"
               value={formData.commitmentLevel}
               onChange={handleInputChange}
-              className="select select-bordered w-full focus:select-primary transition-all duration-200 bg-gray-50/50 hover:bg-white"
+              className="select select-bordered w-full bg-gray-50/50 hover:bg-white text-gray-800 font-medium"
               required
+              disabled={isSubmitting}
             >
               <option disabled value="">
                 Select commitment
@@ -304,7 +302,6 @@ const AddOpportunity = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Industry */}
           <div className="form-control w-full">
             <label className="label">
               <span className="label-text font-semibold text-gray-700">
@@ -315,7 +312,8 @@ const AddOpportunity = () => {
               name="industry"
               value={formData.industry}
               onChange={handleInputChange}
-              className="select select-bordered w-full focus:select-primary transition-all duration-200 bg-gray-50/50 hover:bg-white"
+              className="select select-bordered w-full bg-gray-50/50 hover:bg-white text-gray-800 font-medium"
+              disabled={isSubmitting}
             >
               <option disabled value="">
                 Select industry (Optional)
@@ -327,8 +325,6 @@ const AddOpportunity = () => {
               <option value="E-commerce">E-commerce</option>
             </select>
           </div>
-
-          {/* Deadline */}
           <div className="form-control w-full">
             <label className="label">
               <span className="label-text font-semibold text-gray-700">
@@ -340,31 +336,30 @@ const AddOpportunity = () => {
               name="deadline"
               value={formData.deadline}
               onChange={handleInputChange}
-              className="input input-bordered w-full focus:input-primary transition-all duration-200 bg-gray-50/50 hover:bg-white"
+              className="input input-bordered w-full bg-gray-50/50 hover:bg-white text-gray-800 font-medium"
               required
+              disabled={isSubmitting}
             />
           </div>
         </div>
 
-        {/* Divider */}
         <div className="divider m-0"></div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
           <button
             type="button"
             onClick={() => toast.info("Action cancelled")}
-            className="btn btn-ghost border-gray-200 hover:bg-gray-50"
+            className="btn btn-ghost text-gray-500 hover:bg-gray-50"
+            disabled={isSubmitting}
           >
             Cancel
           </button>
-
           <motion.button
             type="submit"
             disabled={isSubmitting}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-none shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 min-w-[180px]"
+            className="btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-none shadow-lg shadow-blue-500/30 min-w-[180px]"
           >
             {isSubmitting ? (
               <span className="loading loading-spinner loading-sm"></span>

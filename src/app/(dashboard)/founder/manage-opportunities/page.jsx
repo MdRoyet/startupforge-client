@@ -268,30 +268,46 @@ export default function ManageOpportunities() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {opportunities.map((op) => (
-              /* Opportunity Card Layout */
               <div
                 key={op._id}
-                className="bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between relative group"
+                className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex flex-col justify-between relative group"
               >
+                {/* Controls Overlay row items */}
                 <div className="absolute top-4 right-4 flex gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                   <button
                     onClick={() => handleEditClick(op)}
-                    className="btn btn-xs btn-square bg-blue-50 text-blue-600 border-none hover:bg-blue-600 hover:text-white transition-colors"
+                    className="btn btn-xs btn-square bg-blue-50 text-blue-600 border-none hover:bg-blue-600 hover:text-white"
                   >
                     <SvgPencil />
                   </button>
                   <button
                     onClick={() => handleDelete(op._id)}
-                    className="btn btn-xs btn-square bg-red-50 text-red-600 border-none hover:bg-red-600 hover:text-white transition-colors"
+                    className="btn btn-xs btn-square bg-red-50 text-red-600 border-none hover:bg-red-600 hover:text-white"
                   >
                     <SvgTrash />
                   </button>
                 </div>
 
                 <div>
-                  <span className="px-2.5 py-1 rounded-md text-[10px] bg-blue-50 font-bold tracking-wider text-blue-600 uppercase inline-block mb-3">
-                    {op.industry || "General"}
-                  </span>
+                  {/* COMPACT BRAND IDENTIFIER BLOCK ATTACHED */}
+                  <div className="flex items-center gap-3 mb-4">
+                    {op.startupLogo && (
+                      <img
+                        src={op.startupLogo}
+                        alt="Startup Logo"
+                        className="w-8 h-8 rounded-lg object-contain bg-slate-50 border border-slate-100 p-0.5 shadow-sm"
+                      />
+                    )}
+                    <div>
+                      <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider leading-none">
+                        {op.startupName || "Parent Concept"}
+                      </h5>
+                      <span className="text-[10px] font-bold text-blue-500 mt-0.5 inline-block">
+                        {op.industry || "General"}
+                      </span>
+                    </div>
+                  </div>
+
                   <h3 className="text-xl font-bold text-slate-900 leading-snug mb-2 pr-12">
                     {op.roleTitle}
                   </h3>

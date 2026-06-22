@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { signIn } from "@/lib/auth-client";
+import { syncJwtWithBackend } from "@/lib/authBridge";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -30,13 +31,17 @@ export default function LoginPage() {
         return;
       }
 
-      toast.success("Welcome back! Loading marketplace dashboard... 🏠");
+      toast.success("Welcome back! Loading your workspace... 🏠");
+
+      await syncJwtWithBackend();
 
       router.refresh(); // Syncs session cleanly into the global layout environment
 
-      // --- FIXED REDIRECT PIPELINE ---
-      // Force immediate destination delivery right to the public home index page
-      router.push("/");
+      // 🎯 DYNAMIC ROUTING: Read the role from Better-Auth and route instantly
+      const userRole = data?.user?.role?.toLowerCase() || "collaborator";
+      const targetPath = userRole === "founder" ? "/founder" : "/collaborator";
+
+      router.push(targetPath);
     } catch (error) {
       console.error(error);
       toast.error("An unexpected error occurred during user authentication.");
@@ -50,7 +55,10 @@ export default function LoginPage() {
     try {
       const { data, error } = await signIn.social({
         provider: "google",
-        callbackURL: "/", // Google login will also drop users off on the homepage
+        // 🧠 NOTE: Google redirects here automatically after successful login.
+        // If your homepage ("/") doesn't auto-redirect logged-in users,
+        // change this to a generic dashboard or loading route that sorts them!
+        callbackURL: "/",
       });
 
       if (error) {

@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { useSession, signOut } from "@/lib/auth-client"; // Direct Better Auth Integration
+import { syncJwtWithBackend } from "@/lib/authBridge";
 
 // --- INLINE SVG ICONS ---
 const SvgLogo = () => (
@@ -120,6 +121,18 @@ const SvgSparkles = () => (
 );
 
 const CollaboratorSidebar = () => {
+  useEffect(() => {
+    const syncCollaboratorToken = async () => {
+      try {
+        await syncJwtWithBackend();
+      } catch (err) {
+        console.error("Collaborator token sync error:", err);
+      }
+    };
+
+    syncCollaboratorToken();
+  }, []);
+
   const pathname = usePathname();
   const router = useRouter();
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useSession, signOut } from "@/lib/auth-client";
+import { syncJwtWithBackend } from "@/lib/authBridge";
 import { toast } from "react-toastify";
 import {
   Briefcase,
@@ -96,6 +97,10 @@ const FounderSidebar = () => {
   useEffect(() => {
     const checkSubscriptionTier = async () => {
       try {
+        await syncJwtWithBackend().catch((err) =>
+          console.error("Token sync pipeline exception:", err),
+        );
+
         const res = await fetch("http://localhost:5000/api/founder/overview", {
           credentials: "include",
         });

@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { useSession } from "@/lib/auth-client";
 
+// --- INLINE VECTOR UTILITIES ---
 const SvgFilter = () => (
   <svg
     width="16"
@@ -44,45 +46,6 @@ const itemVariants = {
   show: { opacity: 1, y: 0 },
 };
 
-const myApplications = [
-  {
-    id: 1,
-    role: "Senior React Developer",
-    startup: "TechNova AI",
-    logo: "tech",
-    date: "Oct 25, 2023",
-    status: "Pending",
-    skills: ["React", "Node.js"],
-  },
-  {
-    id: 2,
-    role: "Product Designer",
-    startup: "HealthBridge",
-    logo: "health",
-    date: "Oct 22, 2023",
-    status: "Accepted",
-    skills: ["Figma", "UI/UX"],
-  },
-  {
-    id: 3,
-    role: "Backend Engineer",
-    startup: "FinEdge",
-    logo: "fin",
-    date: "Oct 18, 2023",
-    status: "Rejected",
-    skills: ["Python", "AWS"],
-  },
-  {
-    id: 4,
-    role: "Growth Hacker",
-    startup: "EduSpark",
-    logo: "edu",
-    date: "Oct 15, 2023",
-    status: "Pending",
-    skills: ["SEO", "Analytics"],
-  },
-];
-
 const getStatusStyles = (status) => {
   switch (status) {
     case "Accepted":
@@ -95,20 +58,77 @@ const getStatusStyles = (status) => {
 };
 
 const MyApplications = () => {
-  const [filter, setFilter] = useState("All");
+  const { data: session, isPending: sessionLoading } = useSession();
+  const user = session?.user;
 
+  const [applications, setApplications] = useState([]);
+  const [filter, setFilter] = useState("All");
+  const [pageLoading, setPageLoading] = useState(true);
+
+  // --- FETCH DYNAMIC SUBMISSIONS TRACKING STREAM ---
+  useEffect(() => {
+    const fetchMyApplications = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/applications", {
+          credentials: "include",
+        });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+          setApplications(json.data);
+        } else {
+          throw new Error(
+            json.error || "Failed to download applications registry ledger.",
+          );
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error(
+          err.message || "Failed to pull submissions history streams.",
+        );
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchMyApplications();
+    } else if (!sessionLoading && !user) {
+      setPageLoading(false);
+    }
+  }, [user, sessionLoading]);
+
+  // Client side sorting filter logic execution
   const filteredApps =
     filter === "All"
-      ? myApplications
-      : myApplications.filter((app) => app.status === filter);
+      ? applications
+      : applications.filter((app) => app.status === filter);
+
+  if (sessionLoading || pageLoading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-xs font-mono font-bold text-slate-400 gap-2">
+        <span className="loading loading-spinner loading-md text-emerald-600"></span>
+        <span>CONNECTING_PIPELINE_REGISTRIES...</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center text-sm font-mono font-bold text-slate-400 uppercase tracking-widest">
+        Access Denied // Authentication Credentials Required
+      </div>
+    );
+  }
 
   return (
     <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="max-w-6xl mx-auto"
+      className="max-w-6xl mx-auto px-4"
     >
+      {/* Title & Filter Control Node Header */}
       <motion.div
         variants={itemVariants}
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8"
@@ -122,7 +142,7 @@ const MyApplications = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-1.5 shadow-sm">
+        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-1.5 shadow-sm self-start md:self-auto">
           <div className="flex items-center gap-1 text-gray-500 px-2">
             <SvgFilter />
           </div>
@@ -130,7 +150,11 @@ const MyApplications = () => {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${filter === f ? "bg-gray-800 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100"}`}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                filter === f
+                  ? "bg-gray-800 text-white shadow-sm"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
               {f}
             </button>
@@ -138,10 +162,11 @@ const MyApplications = () => {
         </div>
       </motion.div>
 
+      {/* Main Stream Display Container */}
       {filteredApps.length === 0 ? (
         <motion.div
           variants={itemVariants}
-          className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-gray-100"
+          className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-gray-100 shadow-sm"
         >
           <div className="text-gray-300 mb-4">
             <SvgEmptyBox />
@@ -157,49 +182,67 @@ const MyApplications = () => {
         <div className="space-y-4">
           {filteredApps.map((app) => (
             <motion.div
-              key={app.id}
+              key={app._id}
               variants={itemVariants}
               whileHover={{ y: -2 }}
               className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
-              <div className="flex items-center gap-4 flex-1">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                {/* Fallback image strategy handles undefined logos safely */}
                 <img
-                  src={`https://i.pravatar.cc/150?u=${app.logo}`}
-                  alt={app.startup}
-                  className="w-12 h-12 rounded-xl object-cover ring-1 ring-gray-100"
+                  src={
+                    app.startupLogo ||
+                    `https://i.pravatar.cc/150?u=${app.opportunityId}`
+                  }
+                  alt={app.startupName || "Startup Umbrella"}
+                  className="w-12 h-12 rounded-xl object-cover ring-1 ring-gray-100 shrink-0 bg-slate-50 p-0.5"
                 />
-                <div>
-                  <h3 className="text-base font-bold text-gray-800">
-                    {app.role}
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-gray-800 truncate">
+                    {app.roleTitle}
                   </h3>
-                  <p className="text-sm text-gray-500">
-                    {app.startup} • Applied on {app.date}
+                  <p className="text-sm text-gray-500 mt-0.5 font-medium truncate">
+                    {app.startupName || "Startup Partner"} • Applied on{" "}
+                    {new Date(app.createdAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
                   </p>
-                  <div className="flex gap-1.5 mt-2">
-                    {app.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
+
+                  {/* Gracefully processes tech requirement tags arrays if available */}
+                  {app.requiredSkills && app.requiredSkills.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                      {app.requiredSkills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="text-xs bg-gray-50 text-gray-600 border border-gray-200/50 px-2 py-0.5 rounded-md font-semibold"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 self-end md:self-auto shrink-0">
                 <span
-                  className={`text-xs font-semibold px-4 py-1.5 rounded-full border ${getStatusStyles(app.status)}`}
+                  className={`text-xs font-bold px-4 py-1.5 rounded-full border tracking-wide uppercase ${getStatusStyles(
+                    app.status,
+                  )}`}
                 >
-                  {app.status}
+                  {app.status || "Pending"}
                 </span>
+
                 {app.status === "Accepted" && (
                   <button
                     onClick={() =>
-                      toast.success("Message feature coming soon!")
+                      toast.success(
+                        "Secure direct messaging link routing coming soon!",
+                      )
                     }
-                    className="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-sm"
+                    className="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-sm font-bold text-xs px-4 rounded-xl h-9"
                   >
                     Contact
                   </button>

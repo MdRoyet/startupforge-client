@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { useSession } from "@/lib/auth-client";
 
 const SvgUser = () => (
   <svg
@@ -61,21 +62,60 @@ const itemVariants = {
 };
 
 const Profile = () => {
+  const { data: session, isPending: sessionLoading } = useSession();
+  const user = session?.user;
+
+  const [pageLoading, setPageLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: "Jane Doe",
-    email: "jane@collab.com",
-    image: "https://i.pravatar.cc/150?u=jane",
-    bio: "Passionate Frontend Developer with 3 years of experience in React and Next.js. Looking to join an early-stage startup to build impactful products.",
+    name: "",
+    email: "",
+    image: "",
+    bio: "",
   });
 
   const [skillInput, setSkillInput] = useState("");
-  const [skills, setSkills] = useState([
-    "React",
-    "Next.js",
-    "Tailwind CSS",
-    "TypeScript",
-  ]);
+  const [skills, setSkills] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  // --- FETCH PERSISTED PROFILE PROFILE DATA ---
+  useEffect(() => {
+    const loadCollaboratorProfile = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/collaborator/profile",
+          {
+            credentials: "include",
+          },
+        );
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+          setFormData({
+            name: json.data.name || user?.name || "",
+            email: json.data.email || user?.email || "",
+            image:
+              json.data.image || user?.image || "https://i.pravatar.cc/150",
+            bio: json.data.bio || "",
+          });
+          setSkills(json.data.skills || []);
+        }
+      } catch (err) {
+        console.error(
+          "Failed to fetch custom collaborator data components:",
+          err,
+        );
+        toast.error("Failed to fetch extended profile specifications.");
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    if (user) {
+      loadCollaboratorProfile();
+    } else if (!sessionLoading && !user) {
+      setPageLoading(false);
+    }
+  }, [user, sessionLoading]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -99,21 +139,66 @@ const Profile = () => {
     setSkills((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
+  // --- UPDATE PERSISTENCE MATRIX VALUES ---
   const handleSave = async (e) => {
     e.preventDefault();
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    console.log("Saved Data:", { ...formData, skills });
-    toast.success("Profile updated successfully! 🎉");
-    setIsSaving(false);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/collaborator/profile",
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            name: formData.name,
+            image: formData.image,
+            bio: formData.bio,
+            skills: skills,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Server side document update error.");
+      }
+
+      toast.success("Profile updated successfully! 🎉");
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error.message || "Failed to finalize profile modifications updates.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (sessionLoading || pageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
+        <span className="loading loading-spinner loading-lg text-emerald-600"></span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-sm font-mono text-gray-400">
+        UNAUTHORIZED // PLEASE SIGN IN TO ACCESS ENVIRONMENT
+      </div>
+    );
+  }
 
   return (
     <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="max-w-4xl mx-auto pt-40"
+      className="max-w-4xl mx-auto pt-40 px-4"
     >
       <motion.div variants={itemVariants} className="mb-8">
         <div className="flex items-center gap-4 mb-2">
@@ -139,9 +224,9 @@ const Profile = () => {
         {/* Avatar Preview */}
         <div className="flex items-center gap-6">
           <div className="avatar placeholder">
-            <div className="w-24 rounded-2xl bg-gray-100 text-gray-400">
+            <div className="w-24 h-24 rounded-2xl bg-gray-100 text-gray-400">
               <img
-                src={formData.image}
+                src={formData.image || "https://i.pravatar.cc/150"}
                 alt="Avatar"
                 className="object-cover w-full h-full rounded-2xl"
               />
@@ -159,7 +244,7 @@ const Profile = () => {
               value={formData.image}
               onChange={handleInputChange}
               placeholder="https://example.com/image.jpg"
-              className="input input-bordered w-full focus:input-primary bg-gray-50/50"
+              className="input input-bordered w-full focus:input-primary bg-gray-50/50 text-gray-800 text-sm font-medium"
             />
           </div>
         </div>
@@ -176,7 +261,7 @@ const Profile = () => {
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="input input-bordered w-full focus:input-primary bg-gray-50/50"
+              className="input input-bordered w-full focus:input-primary bg-gray-50/50 text-gray-800 text-sm font-medium"
               required
             />
           </div>
@@ -190,8 +275,7 @@ const Profile = () => {
               type="email"
               name="email"
               value={formData.email}
-              onChange={handleInputChange}
-              className="input input-bordered w-full bg-gray-100 text-gray-500 cursor-not-allowed"
+              className="input input-bordered w-full bg-gray-100 text-gray-400 cursor-not-allowed text-sm font-medium"
               disabled
             />
             <label className="label">
@@ -215,7 +299,7 @@ const Profile = () => {
                 key={skill}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="badge bg-emerald-50 text-emerald-700 border-emerald-200 pl-3 pr-1 py-2 text-sm font-medium flex items-center gap-2"
+                className="badge bg-emerald-50 text-emerald-700 border-emerald-200 pl-3 pr-1 py-2 text-sm font-semibold flex items-center gap-2"
               >
                 {skill}
                 <button
@@ -233,7 +317,7 @@ const Profile = () => {
               value={skillInput}
               onChange={(e) => setSkillInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 min-w-[150px] bg-transparent border-none outline-none h-8 text-sm placeholder:text-gray-400"
+              className="flex-1 min-w-[150px] bg-transparent border-none outline-none h-8 text-sm text-gray-800 placeholder:text-gray-400"
             />
           </div>
         </div>
@@ -247,9 +331,9 @@ const Profile = () => {
             name="bio"
             value={formData.bio}
             onChange={handleInputChange}
-            className="textarea textarea-bordered w-full h-32 focus:textarea-primary bg-gray-50/50 resize-none"
+            className="textarea textarea-bordered w-full h-32 focus:textarea-primary bg-gray-50/50 resize-none text-gray-700 text-sm font-medium"
             placeholder="Tell startups why they should hire you..."
-          ></textarea>
+          />
         </div>
 
         <div className="divider m-0"></div>
@@ -260,7 +344,7 @@ const Profile = () => {
             disabled={isSaving}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="btn bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 min-w-[180px]"
+            className="btn bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 min-w-[180px] text-xs font-bold"
           >
             {isSaving ? (
               <span className="loading loading-spinner loading-sm"></span>

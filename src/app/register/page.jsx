@@ -65,15 +65,31 @@ export default function RegisterPage() {
       const imageUploadData = new FormData();
       imageUploadData.append("image", formData.image);
 
-      const imgResponse = await fetch(process.env.NEXT_PUBLIC_API_IMAGES_URL, {
+      const imgbbTargetUrl =
+        process.env.NEXT_PUBLIC_API_IMAGES_URL ||
+        "https://api.imgbb.com/1/upload?key=d6d1f608c8cfa77e816c76772af6fe27";
+
+      const imgResponse = await fetch(imgbbTargetUrl, {
         method: "POST",
         body: imageUploadData,
       });
 
+      const contentType = imgResponse.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const errorText = await imgResponse.text();
+        console.error("Server returned non-JSON response:", errorText);
+        throw new Error(
+          "The image server returned an invalid response page. Check your connection.",
+        );
+      }
+
       const imgData = await imgResponse.json();
 
       if (!imgData.success) {
-        throw new Error("Failed to upload image. Please try a different file.");
+        throw new Error(
+          imgData.error?.message ||
+            "Failed to upload image. Please try a different file.",
+        );
       }
 
       const uploadedImageUrl = imgData.data.display_url;
@@ -81,12 +97,13 @@ export default function RegisterPage() {
       // 2. Register the user with Better Auth using the real image URL
       toast.info("Creating your account...", { autoClose: 1500 });
 
+      // FIX: Added the user selected role directly into the payload allocation
       const { data, error } = await signUp.email({
         email: formData.email,
         password: formData.password,
         name: formData.name,
-        image: uploadedImageUrl, // Real ImgBB URL
-        role: formData.role, // Custom role mapping
+        image: uploadedImageUrl,
+        role: formData.role, // <-- CRITICAL FIXED PAYLOAD FIELD
       });
 
       if (error) {

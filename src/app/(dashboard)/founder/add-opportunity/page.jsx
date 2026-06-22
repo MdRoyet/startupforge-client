@@ -109,7 +109,7 @@ const AddOpportunity = () => {
       skills.length === 0
     ) {
       toast.error(
-        "Please fill all fields and add at least one metric tag requirement skill attribute.",
+        "Please fill all fields and add at least one required skill.",
       );
       return;
     }
@@ -120,6 +120,7 @@ const AddOpportunity = () => {
       const response = await fetch("http://localhost:5000/api/opportunities", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // <-- CRITICAL FIX: Pass session cookies to the server
         body: JSON.stringify({
           roleTitle: formData.roleTitle,
           requiredSkills: skills,
@@ -133,10 +134,7 @@ const AddOpportunity = () => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(
-          result.error ||
-            "Server validation execution tracking error properties failed.",
-        );
+        throw new Error(result.error || "Server validation failed.");
       }
 
       toast.success(
@@ -154,8 +152,7 @@ const AddOpportunity = () => {
     } catch (error) {
       console.error(error);
       toast.error(
-        error.message ||
-          "Communication loop failure to database collections mapping routes.",
+        error.message || "Communication loop failure to database collections.",
       );
     } finally {
       setIsSubmitting(false);

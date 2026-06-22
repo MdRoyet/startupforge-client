@@ -180,15 +180,19 @@ export default function ManageOpportunities() {
     try {
       const res = await fetch(`http://localhost:5000/api/opportunities/${id}`, {
         method: "DELETE",
+        credentials: "include", // <-- THE FINAL FIX: Includes your session cookies for verification
       });
       const data = await res.json();
 
       if (!res.ok || !data.success)
         throw new Error(data.error || "Execution failed.");
 
-      toast.success("Post dropped cleanly.");
+      toast.success(
+        "Opportunity posting permanently deleted from database indexes. 🗑️",
+      );
       setOpportunities((prev) => prev.filter((item) => item._id !== id));
     } catch (err) {
+      console.error(err);
       toast.error(err.message || "Deletion sequence failed.");
     }
   };
@@ -203,19 +207,22 @@ export default function ManageOpportunities() {
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
+          credentials: "include", // <-- THE CRITICAL FIX: Share cookies with the backend
           body: JSON.stringify({ ...formData, requiredSkills: skills }),
         },
       );
       const data = await res.json();
 
-      if (!res.ok || !data.success) throw new Error(data.error);
+      if (!res.ok || !data.success)
+        throw new Error(data.error || "Update failed");
 
-      toast.success("Opportunity properties updated.");
+      toast.success("Opportunity properties updated successfully! 🔄");
       setOpportunities((prev) =>
         prev.map((item) => (item._id === editingId ? data.data : item)),
       );
       setIsModalOpen(false);
     } catch (err) {
+      console.error(err);
       toast.error(err.message || "Update transaction execution anomaly.");
     } finally {
       setIsSubmitting(false);

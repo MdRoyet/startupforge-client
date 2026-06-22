@@ -4,8 +4,24 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { useSession } from "@/lib/auth-client";
+import Link from "next/link"; // Added for seamless homepage routing
 
 // --- INLINE DESIGN SYSTEM CARD GLYPHS ---
+const SvgHome = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
+);
 const SvgUsersCard = () => (
   <svg
     width="20"
@@ -137,14 +153,24 @@ export default function AdminOverviewTab() {
 
   return (
     <div className="space-y-10">
-      {/* Tab Header Meta Context */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-          Admin Dashboard <span className="text-base select-none">🛡️</span>
-        </h1>
-        <p className="text-sm font-medium text-slate-400 mt-1">
-          Platform overview and management.
-        </p>
+      {/* Tab Header Meta Context Block */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            Admin Dashboard <span className="text-base select-none">🛡️</span>
+          </h1>
+          <p className="text-sm font-medium text-slate-400 mt-1">
+            Platform overview and management.
+          </p>
+        </div>
+
+        {/* Navigation Trigger Button Context Anchor Node */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-4 h-10 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all uppercase tracking-wide shrink-0 self-start sm:self-auto"
+        >
+          <SvgHome /> Go to Homepage
+        </Link>
       </div>
 
       {/* Grid Row 1: The 4 Scoring Overview Counters Cards */}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { signUp } from "@/lib/auth-client"; // Imported directly
+import { signUp, signOut } from "@/lib/auth-client"; // <-- FIXED: Imported signOut to clear auto-login sessions
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -97,13 +97,12 @@ export default function RegisterPage() {
       // 2. Register the user with Better Auth using the real image URL
       toast.info("Creating your account...", { autoClose: 1500 });
 
-      // FIX: Added the user selected role directly into the payload allocation
       const { data, error } = await signUp.email({
         email: formData.email,
         password: formData.password,
         name: formData.name,
         image: uploadedImageUrl,
-        role: formData.role, // <-- CRITICAL FIXED PAYLOAD FIELD
+        role: formData.role,
       });
 
       if (error) {
@@ -112,7 +111,16 @@ export default function RegisterPage() {
         return;
       }
 
-      toast.success("Account created successfully! Welcome aboard.");
+      // --- CRITICAL AUTH ACTION FIX ---
+      // Better Auth auto-signs up and sets validation cookies instantly.
+      // We run a silent sign-out here to flush those cookies out of the browser memory.
+      await signOut({
+        redirect: false,
+      });
+
+      toast.success(
+        "Account created successfully! Please sign in manually. 🔐",
+      );
       router.push("/login");
     } catch (error) {
       console.error("Registration Error:", error);
@@ -370,13 +378,13 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right Column: Dynamic Visual Side */}
+      {/* Right Column: Visual Side */}
       <div className="hidden lg:flex w-[40%] bg-slate-900 relative overflow-hidden flex-col justify-between p-12">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-transparent"></div>
 
         <div className="relative z-10">
-          <div className="bg-white/10 p-3 rounded-2xl inline-block backdrop-blur-md border border-white/10">
+          <div className="bg-white/10 p-3 rounded-2xl inline-block backdrop-blur-md border border-white/10 shadow-xl">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"

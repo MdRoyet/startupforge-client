@@ -57,10 +57,14 @@ export default function StartupProfilePortfolioPage({ params }) {
   useEffect(() => {
     const parseTargetEcosystemData = async () => {
       try {
+        // --- CRITICAL FIX: Append the startupId query parameter straight to the URL string ---
         const [startupsRes, oppsRes] = await Promise.all([
           fetch("http://localhost:5000/api/startups"),
-          fetch("http://localhost:5000/api/opportunities"),
+          fetch(
+            `http://localhost:5000/api/opportunities?startupId=${targetId}`,
+          ), // Backend filters this securely
         ]);
+
         const startupsJson = await startupsRes.json();
         const oppsJson = await oppsRes.json();
 
@@ -70,11 +74,8 @@ export default function StartupProfilePortfolioPage({ params }) {
         }
 
         if (oppsJson.success) {
-          // Filter down to show assignments belonging strictly to this startup umbrella
-          const matches = oppsJson.data.filter(
-            (op) => op.startupId === targetId,
-          );
-          setAssociatedRoles(matches);
+          // No client-side filtering lag needed anymore; the backend returns the exact matches!
+          setAssociatedRoles(oppsJson.data);
         }
       } catch (err) {
         console.error("Relational lookup fault:", err);

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { signIn } from "@/lib/auth-client";
@@ -13,7 +13,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -31,18 +30,16 @@ export default function LoginPage() {
         return;
       }
 
-      toast.success("Welcome back! Logging you in...");
+      toast.success("Welcome back! Loading marketplace dashboard... 🏠");
 
-      router.refresh(); // Syncs session cleanly to global layout layout
+      router.refresh(); // Syncs session cleanly into the global layout environment
 
-      const intendedRoute = searchParams.get("redirect");
-      if (intendedRoute) {
-        router.push(intendedRoute);
-      } else {
-        router.push("/");
-      }
+      // --- FIXED REDIRECT PIPELINE ---
+      // Force immediate destination delivery right to the public home index page
+      router.push("/");
     } catch (error) {
-      toast.error("An unexpected error occurred.");
+      console.error(error);
+      toast.error("An unexpected error occurred during user authentication.");
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +50,7 @@ export default function LoginPage() {
     try {
       const { data, error } = await signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: "/", // Google login will also drop users off on the homepage
       });
 
       if (error) {

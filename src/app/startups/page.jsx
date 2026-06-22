@@ -73,22 +73,24 @@ export default function BrowseStartupsPage() {
   useEffect(() => {
     const compilePublicDirectory = async () => {
       try {
+        // --- FIX: Append ?limit=1000 to pull all opportunities for badge counting ---
         const [startupsRes, oppsRes] = await Promise.all([
           fetch("http://localhost:5000/api/startups"),
-          fetch("http://localhost:5000/api/opportunities"),
+          fetch("http://localhost:5000/api/opportunities?limit=1000"),
         ]);
         const startupsJson = await startupsRes.json();
         const oppsJson = await oppsRes.json();
 
         if (startupsJson.success) {
-          // Guard constraint: Safeguard loops against duplicate index key bugs
           const cleanStartups = startupsJson.data.filter(
             (item, idx, self) =>
               self.findIndex((t) => t._id === item._id) === idx,
           );
           setStartups(cleanStartups);
         }
-        if (oppsJson.success) setOpportunities(oppsJson.data);
+        if (oppsJson.success) {
+          setOpportunities(oppsJson.data);
+        }
       } catch (err) {
         console.error("Directory aggregation anomaly:", err);
       } finally {

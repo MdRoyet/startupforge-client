@@ -145,6 +145,7 @@ export default function ApplyToOpportunityPage({ params }) {
       const response = await fetch("http://localhost:5000/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // <-- CRITICAL FIX: Forces browser cookies to pass the CORS barrier
         body: JSON.stringify({
           opportunityId,
           ...formData,

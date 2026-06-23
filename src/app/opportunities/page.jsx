@@ -6,6 +6,35 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 // --- INLINE DESIGN SYSTEM SVGS ---
+const SvgSearch = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+const SvgFilter = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+  </svg>
+);
 const SvgGrid = () => (
   <svg
     className="absolute inset-0 -z-10 h-full w-full stroke-slate-200 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]"
@@ -138,19 +167,44 @@ function OpportunitiesContent() {
   const [opportunities, setOpportunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // --- SEARCH & FILTER STATE ---
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [workTypeFilter, setWorkTypeFilter] = useState("");
+  const [industryFilter, setIndustryFilter] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalPoolSize, setTotalPoolSize] = useState(0);
   const itemsPerPage = 9;
+
+  // Debounce the search input by 500ms
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setCurrentPage(1); // Reset to page 1 on new search
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [workTypeFilter, industryFilter]);
 
   useEffect(() => {
     const fetchEcosystemOpportunities = async () => {
       setIsLoading(true);
       try {
         let targetUrl = `http://localhost:5000/api/opportunities?page=${currentPage}&limit=${itemsPerPage}`;
-        if (startupFilterId) {
-          targetUrl += `&startupId=${startupFilterId}`;
-        }
+
+        if (startupFilterId) targetUrl += `&startupId=${startupFilterId}`;
+        if (debouncedSearch)
+          targetUrl += `&search=${encodeURIComponent(debouncedSearch)}`;
+        if (workTypeFilter)
+          targetUrl += `&workType=${encodeURIComponent(workTypeFilter)}`;
+        if (industryFilter)
+          targetUrl += `&industry=${encodeURIComponent(industryFilter)}`;
 
         const res = await fetch(targetUrl);
         const json = await res.json();
@@ -174,7 +228,13 @@ function OpportunitiesContent() {
     };
 
     fetchEcosystemOpportunities();
-  }, [currentPage, startupFilterId]);
+  }, [
+    currentPage,
+    startupFilterId,
+    debouncedSearch,
+    workTypeFilter,
+    industryFilter,
+  ]);
 
   const handlePageNavigation = (targetPage) => {
     setCurrentPage(targetPage);
@@ -184,7 +244,7 @@ function OpportunitiesContent() {
 
   return (
     <div id="directory-anchor" className="max-w-7xl mx-auto scroll-mt-32">
-      <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200 pb-6 mb-10 gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200 pb-6 mb-6 gap-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-blue-700 rounded text-[10px] font-mono font-bold uppercase tracking-wider mb-2.5">
             Ecosystem_Resource_Pool // ACTIVE
@@ -201,6 +261,66 @@ function OpportunitiesContent() {
         </div>
         <div className="text-xs font-mono text-slate-400 font-bold bg-slate-100 border px-3 py-1.5 rounded-lg shrink-0">
           POOL CAPACITY: {totalPoolSize.toString().padStart(2, "0")} UNITS
+        </div>
+      </div>
+
+      {/* --- SEARCH & FILTER BAR --- */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-10 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div className="relative flex-1">
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+            <SvgSearch />
+          </span>
+          <input
+            type="text"
+            placeholder="Search by Role Title or Required Skills..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 text-sm text-slate-800 font-medium rounded-xl outline-none focus:border-slate-400 focus:bg-white transition-all"
+          />
+        </div>
+
+        <div className="flex items-center gap-3 sm:w-auto w-full">
+          <div className="relative flex-1 sm:w-48">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <SvgMapPin />
+            </span>
+            <select
+              value={workTypeFilter}
+              onChange={(e) => setWorkTypeFilter(e.target.value)}
+              className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 text-sm text-slate-700 font-medium rounded-xl outline-none focus:border-slate-400 focus:bg-white transition-all appearance-none cursor-pointer"
+            >
+              <option value="">All Work Types</option>
+              <option value="Remote">Remote</option>
+              <option value="On-site">On-site</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <SvgFilter />
+            </div>
+          </div>
+
+          <div className="relative flex-1 sm:w-48">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <SvgBriefcase />
+            </span>
+            <select
+              value={industryFilter}
+              onChange={(e) => setIndustryFilter(e.target.value)}
+              className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 text-sm text-slate-700 font-medium rounded-xl outline-none focus:border-slate-400 focus:bg-white transition-all appearance-none cursor-pointer"
+            >
+              <option value="">All Industries</option>
+              <option value="SaaS & Software">SaaS & Software</option>
+              <option value="Artificial Intelligence">
+                AI / Machine Learning
+              </option>
+              <option value="Fintech">Fintech</option>
+              <option value="Healthcare & BioTech">Healthcare & BioTech</option>
+              <option value="E-Commerce">E-Commerce</option>
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <SvgFilter />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -236,13 +356,21 @@ function OpportunitiesContent() {
             This search query mapping cluster returned empty results inside
             active database fields.
           </p>
-          {startupFilterId && (
-            <Link
-              href="/opportunities"
+          {(startupFilterId ||
+            debouncedSearch ||
+            workTypeFilter ||
+            industryFilter) && (
+            <button
+              onClick={() => {
+                setSearchInput("");
+                setWorkTypeFilter("");
+                setIndustryFilter("");
+                // Note: startupFilterId is in the URL, so clearing it requires a Link/Router push to /opportunities
+              }}
               className="btn btn-sm bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg mt-4 px-4 border-none text-xs"
             >
               Clear Filters
-            </Link>
+            </button>
           )}
         </div>
       ) : (
@@ -341,7 +469,7 @@ function OpportunitiesContent() {
           </motion.div>
 
           {/* --- PAGINATION INTERFACE --- */}
-          {!startupFilterId && totalPages > 1 && (
+          {totalPages > 1 && (
             <div className="mt-12 pt-5 border-t border-slate-200 flex items-center justify-between text-xs font-mono font-bold text-slate-500">
               <button
                 onClick={() => handlePageNavigation(currentPage - 1)}

@@ -192,7 +192,7 @@ export default function CreateStartup() {
   const [pageLoading, setPageLoading] = useState(true);
   const [startups, setStartups] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null); // Tracks CRUD Update targets
+  const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState({
     startupName: "",
@@ -203,7 +203,6 @@ export default function CreateStartup() {
     description: "",
   });
 
-  // Fetch profiles on initialization mount
   useEffect(() => {
     const fetchMyStartups = async () => {
       try {
@@ -277,7 +276,6 @@ export default function CreateStartup() {
     }
   };
 
-  // Triggered when clicking "Edit" row buttons
   const handleEditClick = (startup) => {
     setEditingId(startup._id);
     setFormData({
@@ -291,7 +289,6 @@ export default function CreateStartup() {
     setIsModalOpen(true);
   };
 
-  // Triggered when clicking "Delete" row buttons
   const handleDeleteClick = async (id) => {
     if (
       !window.confirm(
@@ -322,7 +319,6 @@ export default function CreateStartup() {
     }
   };
 
-  // Central Dual-Action Submission Pipeline
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.logoUrl) {
@@ -332,7 +328,6 @@ export default function CreateStartup() {
 
     setIsSubmitting(true);
 
-    // Determine dynamic CRUD operation parameters
     const apiUrl = editingId
       ? `http://localhost:5000/api/startups/${editingId}`
       : "http://localhost:5000/api/startups";
@@ -417,7 +412,6 @@ export default function CreateStartup() {
 
   return (
     <div className="max-w-4xl mx-auto pt-24 px-4 sm:px-6 lg:px-8 pb-16">
-      {/* Header Area Layout Framework */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
@@ -436,7 +430,6 @@ export default function CreateStartup() {
         </button>
       </div>
 
-      {/* Startup Listing Workspace Matrix */}
       {startups.length > 0 ? (
         <div className="space-y-6">
           {startups.map((startup) => (
@@ -447,18 +440,18 @@ export default function CreateStartup() {
               animate="visible"
               className="bg-white rounded-2xl border border-gray-100 shadow-xl p-6 sm:p-10 space-y-8 relative group"
             >
-              {/* CRUD Row Action Controls Trigger Dashboard Panels */}
-              <div className="absolute top-6 right-6 flex items-center gap-2 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {/* 🎯 UPGRADED ACTION BUTTONS: Better gap, shadows, hover lift, and precise sizing */}
+              <div className="absolute top-6 right-6 flex items-center gap-3 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
                 <button
                   onClick={() => handleEditClick(startup)}
-                  className="btn btn-sm btn-square bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border-none rounded-lg"
+                  className="flex items-center justify-center w-10 h-10 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl shadow-sm hover:shadow-md hover:shadow-blue-500/30 hover:-translate-y-1 transition-all"
                   title="Modify Profile Metrics"
                 >
                   <SvgPencil />
                 </button>
                 <button
                   onClick={() => handleDeleteClick(startup._id)}
-                  className="btn btn-sm btn-square bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border-none rounded-lg"
+                  className="flex items-center justify-center w-10 h-10 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl shadow-sm hover:shadow-md hover:shadow-red-500/30 hover:-translate-y-1 transition-all"
                   title="Drop System Assets"
                 >
                   <SvgTrash />
@@ -467,14 +460,27 @@ export default function CreateStartup() {
 
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-gray-100">
                 <img
-                  src={startup.logo}
+                  src={startup.logo || startup.logoUrl}
                   alt="Company Logo"
-                  className="w-24 h-24 rounded-2xl object-contain bg-gray-50 border border-gray-100 p-2 shadow-sm"
+                  className="w-24 h-24 rounded-2xl object-contain bg-gray-50 border border-gray-100 p-2 shadow-sm shrink-0"
                 />
-                <div className="text-center sm:text-left space-y-1">
-                  <h2 className="text-2xl font-black text-gray-900 pr-16">
-                    {startup.startupName}
-                  </h2>
+                <div className="text-center sm:text-left space-y-2 w-full">
+                  {/* 🎯 FIXED OVERLAP: Added sm:pr-24 to create a safe zone for the floating buttons */}
+                  <div className="flex flex-col sm:flex-row items-center sm:justify-between sm:pr-24">
+                    <h2 className="text-2xl font-black text-gray-900 truncate">
+                      {startup.startupName}
+                    </h2>
+                    <span
+                      className={`mt-2 sm:mt-0 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-full border whitespace-nowrap
+                      ${!startup.status || startup.status === "Pending" ? "bg-amber-50 text-amber-600 border-amber-200" : ""}
+                      ${startup.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : ""}
+                      ${startup.status === "Rejected" ? "bg-red-50 text-red-600 border-red-200" : ""}
+                    `}
+                    >
+                      {startup.status || "Pending"}
+                    </span>
+                  </div>
+
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
                     <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-wider">
                       {startup.industry}
@@ -500,7 +506,9 @@ export default function CreateStartup() {
                     Initialization Date
                   </span>
                   <p className="text-sm font-semibold text-gray-700">
-                    {new Date(startup.createdAt).toLocaleDateString(undefined, {
+                    {new Date(
+                      startup.createdAt || Date.now(),
+                    ).toLocaleDateString(undefined, {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
@@ -516,6 +524,17 @@ export default function CreateStartup() {
                 <p className="text-sm leading-relaxed text-gray-600 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
                   {startup.description}
                 </p>
+
+                {/* 🎯 INJECTED PENDING WARNING BANNER HERE */}
+                {(!startup.status || startup.status === "Pending") && (
+                  <div className="mt-4 p-4 bg-amber-50/50 border border-amber-100 rounded-xl">
+                    <p className="text-sm text-amber-700 font-medium flex items-center gap-2">
+                      <span className="text-amber-500">⏳</span> Your startup is
+                      currently under review by our admin team. You will be able
+                      to post opportunities once approved.
+                    </p>
+                  </div>
+                )}
               </div>
             </motion.div>
           ))}

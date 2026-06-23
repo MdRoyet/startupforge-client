@@ -39,7 +39,19 @@ export default function LoginPage() {
 
       // 🎯 DYNAMIC ROUTING: Read the role from Better-Auth and route instantly
       const userRole = data?.user?.role?.toLowerCase() || "collaborator";
-      const targetPath = userRole === "founder" ? "/founder" : "/collaborator";
+
+      // 1. Define exactly where each role should go
+      const routeMap = {
+        admin: "/admin", // 🎯 Admin goes to main homepage (or change to "/admin")
+        founder: "/founder", // Founder goes to founder dashboard
+        collaborator: "/collaborator", // Collaborator goes to collaborator dashboard
+      };
+
+      // 2. Look up the destination based on their role, defaulting to homepage if unknown
+      const targetPath = routeMap[userRole] || "/";
+
+      // 3. Trigger the redirect
+      router.push(targetPath);
 
       router.push(targetPath);
     } catch (error) {

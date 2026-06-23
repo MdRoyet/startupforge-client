@@ -121,9 +121,17 @@ export default function AdminManageStartups() {
             ? "Startup brand successfully approved!"
             : "Startup verification status retracted.",
         );
+
+        // 🎯 THE MODIFICATION: Update both isApproved AND status locally
         setStartups((prev) =>
           prev.map((s) =>
-            s._id === targetId ? { ...s, isApproved: updatedApprovalState } : s,
+            s._id === targetId
+              ? {
+                  ...s,
+                  isApproved: updatedApprovalState,
+                  status: updatedApprovalState ? "Approved" : "Pending",
+                }
+              : s,
           ),
         );
       } else {

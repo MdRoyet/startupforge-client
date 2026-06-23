@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { useSession } from "@/lib/auth-client";
-import Link from "next/link"; // Added for seamless homepage routing
+import { useSession, signOut } from "@/lib/auth-client"; // 🎯 Imported signOut
+import { useRouter } from "next/navigation"; // 🎯 Imported useRouter for redirect
+import Link from "next/link";
 
 // --- INLINE DESIGN SYSTEM CARD GLYPHS ---
 const SvgHome = () => (
@@ -20,6 +21,46 @@ const SvgHome = () => (
   >
     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     <polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
+);
+// 🎯 Added Sign Out Icon
+const SvgSignOut = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+// 🎯 Added Loader for the button state
+const SvgLoader = () => (
+  <svg
+    className="animate-spin"
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="12" y1="2" x2="12" y2="6"></line>
+    <line x1="12" y1="18" x2="12" y2="22"></line>
+    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+    <line x1="2" y1="12" x2="6" y2="12"></line>
+    <line x1="18" y1="12" x2="22" y2="12"></line>
+    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
   </svg>
 );
 const SvgUsersCard = () => (
@@ -91,6 +132,7 @@ const SvgRevenueCard = () => (
 export default function AdminOverviewTab() {
   const { data: session } = useSession();
   const user = session?.user;
+  const router = useRouter(); // 🎯 Initialize router
 
   const [metrics, setMetrics] = useState({
     totalUsers: 0,
@@ -99,6 +141,7 @@ export default function AdminOverviewTab() {
     totalRevenue: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isSigningOut, setIsSigningOut] = useState(false); // 🎯 Track sign out state
 
   useEffect(() => {
     const fetchOverviewTelemetry = async () => {
@@ -120,6 +163,20 @@ export default function AdminOverviewTab() {
 
     if (user) fetchOverviewTelemetry();
   }, [user]);
+
+  // 🎯 Dynamic Sign Out Handler
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      await signOut(); // Better-Auth native signout
+      toast.success("Successfully signed out of Admin Dashboard.");
+      router.push("/login"); // Redirect to your login/home page
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast.error("Failed to terminate session.");
+      setIsSigningOut(false);
+    }
+  };
 
   // --- DYNAMIC SVG PIE CHART MATHEMATICS LAYERS ---
   const { totalUsers, totalStartups, totalOpportunities } = metrics;
@@ -164,13 +221,26 @@ export default function AdminOverviewTab() {
           </p>
         </div>
 
-        {/* Navigation Trigger Button Context Anchor Node */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-4 h-10 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all uppercase tracking-wide shrink-0 self-start sm:self-auto"
-        >
-          <SvgHome /> Go to Homepage
-        </Link>
+        {/* 🎯 Updated Action Buttons Container */}
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          {/* Navigation Trigger Button Context Anchor Node */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-4 h-10 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all uppercase tracking-wide shrink-0"
+          >
+            <SvgHome /> Go to Homepage
+          </Link>
+
+          {/* 🎯 Dynamic Sign Out Button */}
+          <button
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="inline-flex items-center gap-2 px-4 h-10 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl shadow-sm border border-rose-100 transition-all uppercase tracking-wide shrink-0 disabled:opacity-50"
+          >
+            {isSigningOut ? <SvgLoader /> : <SvgSignOut />}
+            {isSigningOut ? "Signing out..." : "Sign Out"}
+          </button>
+        </div>
       </div>
 
       {/* Grid Row 1: The 4 Scoring Overview Counters Cards */}

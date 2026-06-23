@@ -129,9 +129,12 @@ export default function AdminDashboardLayout({ children }) {
               <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center border border-purple-100">
                 <SvgLogo />
               </div>
-              <span className="font-bold text-slate-900 tracking-tight text-base">
+              <Link
+                href="/"
+                className="font-bold text-slate-900 tracking-tight text-base"
+              >
                 StartupForge
-              </span>
+              </Link>
             </div>
           </div>
 

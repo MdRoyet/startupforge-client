@@ -5,6 +5,25 @@ import Footer from "@/components/Footer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS
 
+// 🎯 THE GLOBAL INTERCEPTOR: Hijacks browser fetch to automatically inject credentials
+if (typeof window !== "undefined") {
+  const originalFetch = window.fetch;
+  window.fetch = async (input, init) => {
+    const url = typeof input === "string" ? input : input.url;
+
+    // If the request hits your Vercel backend, automatically attach authentication cookies
+    if (
+      url.includes("startupforge-server-ten.vercel.app") ||
+      url.includes("/api/")
+    ) {
+      init = init || {};
+      init.credentials = "include";
+    }
+
+    return originalFetch(input, init);
+  };
+}
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,7 +47,7 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-gray-900 selection:bg-indigo-500 selection:text-white">
-        <Navbar></Navbar>
+        <Navbar />
 
         <main className="flex-grow">{children}</main>
 

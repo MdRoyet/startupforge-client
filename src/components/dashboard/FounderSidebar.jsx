@@ -101,9 +101,12 @@ const FounderSidebar = () => {
           console.error("Token sync pipeline exception:", err),
         );
 
-        const res = await fetch("http://localhost:5000/api/founder/overview", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://startupforge-server-ten.vercel.app/api/founder/overview",
+          {
+            credentials: "include",
+          },
+        );
         const json = await res.json();
         if (json.success && json.data?.plan) {
           setUserPlan(json.data.plan);
@@ -141,14 +144,19 @@ const FounderSidebar = () => {
 
     setUpgrading(true);
     try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          role: "founder",
-          email: user.email,
-        }),
-      });
+      const res = await fetch(
+        "https://startupforge-server-ten.vercel.app/api/checkout",
+        {
+          method: "POST",
+          credentials: "include",
+
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            role: "founder",
+            email: user.email,
+          }),
+        },
+      );
       const data = await res.json();
 
       if (data.url) {

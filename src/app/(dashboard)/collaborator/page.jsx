@@ -172,10 +172,13 @@ const CollaboratorOverview = () => {
     const fetchDashboardTelemetry = async () => {
       try {
         const [metricsRes, applicationsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/collaborator/overview", {
-            credentials: "include",
-          }),
-          fetch("http://localhost:5000/api/applications", {
+          fetch(
+            "https://startupforge-server-ten.vercel.app/api/collaborator/overview",
+            {
+              credentials: "include",
+            },
+          ),
+          fetch("https://startupforge-server-ten.vercel.app/api/applications", {
             credentials: "include",
           }),
         ]);
@@ -263,14 +266,19 @@ const CollaboratorOverview = () => {
 
     setUpgrading(true);
     try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          role: "collaborator",
-          email: user?.email, // 👈 PASSING LOGGED-IN EMAIL TO NEXT.JS API
-        }),
-      });
+      const res = await fetch(
+        "https://startupforge-server-ten.vercel.app/api/checkout",
+        {
+          method: "POST",
+
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            role: "collaborator",
+            email: user?.email, // 👈 PASSING LOGGED-IN EMAIL TO NEXT.JS API
+          }),
+        },
+      );
       const data = await res.json();
 
       if (data.url) {

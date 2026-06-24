@@ -82,7 +82,7 @@ const Profile = () => {
     const loadCollaboratorProfile = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/collaborator/profile",
+          "https://startupforge-server-ten.vercel.app/api/collaborator/profile",
           {
             credentials: "include",
           },
@@ -146,7 +146,7 @@ const Profile = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/collaborator/profile",
+        "https://startupforge-server-ten.vercel.app/api/collaborator/profile",
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

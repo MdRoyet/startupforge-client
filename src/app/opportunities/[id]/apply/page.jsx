@@ -101,7 +101,7 @@ export default function ApplyToOpportunityPage({ params }) {
     const fetchTargetOpportunity = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/opportunities/${opportunityId}`,
+          `https://startupforge-server-ten.vercel.app/api/opportunities/${opportunityId}`,
         );
         const json = await res.json();
         if (res.ok && json.success) {
@@ -142,15 +142,20 @@ export default function ApplyToOpportunityPage({ params }) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // <-- CRITICAL FIX: Forces browser cookies to pass the CORS barrier
-        body: JSON.stringify({
-          opportunityId,
-          ...formData,
-        }),
-      });
+      const response = await fetch(
+        "https://startupforge-server-ten.vercel.app/api/applications",
+        {
+          method: "POST",
+          credentials: "include",
+
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // <-- CRITICAL FIX: Forces browser cookies to pass the CORS barrier
+          body: JSON.stringify({
+            opportunityId,
+            ...formData,
+          }),
+        },
+      );
 
       const result = await response.json();
 

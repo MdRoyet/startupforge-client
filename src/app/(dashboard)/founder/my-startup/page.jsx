@@ -206,9 +206,12 @@ export default function CreateStartup() {
   useEffect(() => {
     const fetchMyStartups = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/startups/me", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://startupforge-server-ten.vercel.app/api/startups/me",
+          {
+            credentials: "include",
+          },
+        );
         const result = await res.json();
         if (res.ok && result.success && Array.isArray(result.data)) {
           setStartups(result.data);
@@ -257,6 +260,8 @@ export default function CreateStartup() {
         `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
         {
           method: "POST",
+          credentials: "include",
+
           body: bodyData,
         },
       );
@@ -298,10 +303,13 @@ export default function CreateStartup() {
       return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/startups/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `https://startupforge-server-ten.vercel.app/api/startups/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
       const result = await response.json();
 
       if (!response.ok || !result.success) {
@@ -329,8 +337,8 @@ export default function CreateStartup() {
     setIsSubmitting(true);
 
     const apiUrl = editingId
-      ? `http://localhost:5000/api/startups/${editingId}`
-      : "http://localhost:5000/api/startups";
+      ? `https://startupforge-server-ten.vercel.app/api/startups/${editingId}`
+      : `https://startupforge-server-ten.vercel.app/api/startups`;
     const apiMethod = editingId ? "PUT" : "POST";
 
     try {

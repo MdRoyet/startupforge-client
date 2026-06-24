@@ -35,9 +35,11 @@ function SuccessPageContent() {
     const verifyTransactionPipeline = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/checkout/success",
+          "https://startupforge-server-ten.vercel.app/api/checkout/success",
           {
             method: "POST",
+            credentials: "include",
+
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sessionId }),
           },

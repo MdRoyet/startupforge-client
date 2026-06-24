@@ -215,7 +215,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/dashboard"
+                  href="/"
                   className="text-base opacity-75 hover:opacity-100 hover:text-primary hover:translate-x-1 inline-block transition-all duration-300"
                 >
                   Dashboard

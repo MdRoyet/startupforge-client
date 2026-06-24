@@ -49,7 +49,7 @@ export default function AdminTransactionsLedger() {
     const fetchFinancialLedger = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/admin/transactions",
+          "https://startupforge-server-ten.vercel.app/api/admin/transactions",
           {
             credentials: "include",
           },

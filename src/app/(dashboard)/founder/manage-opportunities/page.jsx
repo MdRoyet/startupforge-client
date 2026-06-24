@@ -123,7 +123,9 @@ export default function ManageOpportunities() {
   useEffect(() => {
     const fetchOpportunities = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/opportunities");
+        const res = await fetch(
+          "https://startupforge-server-ten.vercel.app/api/opportunities",
+        );
         const json = await res.json();
         if (res.ok && json.success) {
           setOpportunities(json.data);
@@ -178,10 +180,13 @@ export default function ManageOpportunities() {
       return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/opportunities/${id}`, {
-        method: "DELETE",
-        credentials: "include", // <-- THE FINAL FIX: Includes your session cookies for verification
-      });
+      const res = await fetch(
+        `https://startupforge-server-ten.vercel.app/api/opportunities/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include", // <-- THE FINAL FIX: Includes your session cookies for verification
+        },
+      );
       const data = await res.json();
 
       if (!res.ok || !data.success)
@@ -203,7 +208,7 @@ export default function ManageOpportunities() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/opportunities/${editingId}`,
+        `https://startupforge-server-ten.vercel.app/api/opportunities/${editingId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 
-export default function AuthSyncPage() {
+// 1. Core authentication syncing component
+function AuthSyncContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const role = searchParams.get("role");
@@ -16,7 +17,11 @@ export default function AuthSyncPage() {
       }
 
       try {
-        const res = await fetch("http://localhost:5000/api/users/role", {
+        // 🎯 THE URL FIX: Swapped localhost:5000 for your live Vercel server URL!
+        const backendBaseUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          "https://startupforge-server-ten.vercel.app";
+        const res = await fetch(`${backendBaseUrl}/api/users/role`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ role }),
@@ -33,12 +38,10 @@ export default function AuthSyncPage() {
             window.location.href = "/collaborator";
           }
         } else {
-          // 🚨 DEBUG POPUP: This will tell us exactly why the backend failed!
           alert(`BACKEND REJECTED UPGRADE: ${json.error || "Unknown Error"}`);
           window.location.href = "/";
         }
       } catch (err) {
-        // 🚨 DEBUG POPUP: This will tell us if it's a network/CORS issue
         alert(`NETWORK ERROR: ${err.message}`);
         window.location.href = "/";
       }
@@ -54,5 +57,23 @@ export default function AuthSyncPage() {
         Provisioning your {role || "Workspace"} profile...
       </p>
     </div>
+  );
+}
+
+// 2. Main Page component providing the required Suspense boundary wrapper
+export default function AuthSyncPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center font-mono text-sm text-slate-500">
+          <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-6 shadow-sm" />
+          <p className="font-bold tracking-wider uppercase text-xs">
+            Initializing Secure Session Handler...
+          </p>
+        </div>
+      }
+    >
+      <AuthSyncContent />
+    </Suspense>
   );
 }

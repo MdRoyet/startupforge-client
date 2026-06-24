@@ -59,9 +59,9 @@ export default function StartupProfilePortfolioPage({ params }) {
       try {
         // --- CRITICAL FIX: Append the startupId query parameter straight to the URL string ---
         const [startupsRes, oppsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/startups"),
+          fetch("https://startupforge-server-ten.vercel.app/api/startups"),
           fetch(
-            `http://localhost:5000/api/opportunities?startupId=${targetId}`,
+            `https://startupforge-server-ten.vercel.app/api/opportunities?startupId=${targetId}`,
           ), // Backend filters this securely
         ]);
 

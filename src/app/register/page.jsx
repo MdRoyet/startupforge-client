@@ -114,6 +114,8 @@ export default function RegisterPage() {
 
       const imgResponse = await fetch(imgbbTargetUrl, {
         method: "POST",
+        credentials: "include",
+
         body: imageUploadData,
       });
 

@@ -104,7 +104,7 @@ export default function OpportunityDetailsPage({ params }) {
     const fetchOpportunitySpecifications = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/opportunities/${targetId}`,
+          `https://startupforge-server-ten.vercel.app/api/opportunities/${targetId}`,
         );
         const json = await res.json();
 

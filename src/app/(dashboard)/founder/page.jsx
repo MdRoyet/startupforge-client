@@ -247,9 +247,12 @@ const FounderOverview = () => {
   const fetchFounderDashboardTelemetry = async (showToast = false) => {
     if (showToast) setSyncing(true);
     try {
-      const res = await fetch("http://localhost:5000/api/founder/overview", {
-        credentials: "include",
-      });
+      const res = await fetch(
+        "https://startupforge-server-ten.vercel.app/api/founder/overview",
+        {
+          credentials: "include",
+        },
+      );
       const json = await res.json();
 
       if (res.ok && json.success) {

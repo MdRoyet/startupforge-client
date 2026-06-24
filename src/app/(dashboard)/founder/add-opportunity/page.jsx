@@ -83,9 +83,12 @@ const AddOpportunity = () => {
   useEffect(() => {
     const loadCompanyOptions = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/startups/me", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://startupforge-server-ten.vercel.app/api/startups/me",
+          {
+            credentials: "include",
+          },
+        );
         const json = await res.json();
         if (res.ok && json.success) {
           setMyStartups(json.data);
@@ -140,20 +143,25 @@ const AddOpportunity = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/opportunities", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          startupId: formData.startupId, // Pass startup pointer context selection
-          roleTitle: formData.roleTitle,
-          requiredSkills: skills,
-          workType: formData.workType,
-          commitmentLevel: formData.commitmentLevel,
-          deadline: formData.deadline,
-          industry: formData.industry,
-        }),
-      });
+      const response = await fetch(
+        "https://startupforge-server-ten.vercel.app/api/opportunities",
+        {
+          method: "POST",
+          credentials: "include",
+
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            startupId: formData.startupId, // Pass startup pointer context selection
+            roleTitle: formData.roleTitle,
+            requiredSkills: skills,
+            workType: formData.workType,
+            commitmentLevel: formData.commitmentLevel,
+            deadline: formData.deadline,
+            industry: formData.industry,
+          }),
+        },
+      );
 
       const result = await response.json();
 

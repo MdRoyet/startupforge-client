@@ -75,8 +75,10 @@ export default function BrowseStartupsPage() {
       try {
         // --- FIX: Append ?limit=1000 to pull all opportunities for badge counting ---
         const [startupsRes, oppsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/startups"),
-          fetch("http://localhost:5000/api/opportunities?limit=1000"),
+          fetch("https://startupforge-server-ten.vercel.app/api/startups"),
+          fetch(
+            "https://startupforge-server-ten.vercel.app/api/opportunities?limit=1000",
+          ),
         ]);
         const startupsJson = await startupsRes.json();
         const oppsJson = await oppsRes.json();

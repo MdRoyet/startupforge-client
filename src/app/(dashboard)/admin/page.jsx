@@ -146,9 +146,12 @@ export default function AdminOverviewTab() {
   useEffect(() => {
     const fetchOverviewTelemetry = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/overview", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://startupforge-server-ten.vercel.app/api/admin/overview",
+          {
+            credentials: "include",
+          },
+        );
         const json = await res.json();
         if (res.ok && json.success) {
           setMetrics(json.data);

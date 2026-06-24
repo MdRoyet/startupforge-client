@@ -196,7 +196,7 @@ function OpportunitiesContent() {
     const fetchEcosystemOpportunities = async () => {
       setIsLoading(true);
       try {
-        let targetUrl = `http://localhost:5000/api/opportunities?page=${currentPage}&limit=${itemsPerPage}`;
+        let targetUrl = `https://startupforge-server-ten.vercel.app/api/opportunities?page=${currentPage}&limit=${itemsPerPage}`;
 
         if (startupFilterId) targetUrl += `&startupId=${startupFilterId}`;
         if (debouncedSearch)

@@ -108,10 +108,13 @@ export default function FounderApplicationsDashboard() {
   useEffect(() => {
     const fetchFounderApplications = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/applications", {
-          method: "GET",
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://startupforge-server-ten.vercel.app/api/applications",
+          {
+            method: "GET",
+            credentials: "include",
+          },
+        );
         const json = await res.json();
         if (res.ok && json.success) {
           setApplications(json.data);
@@ -131,7 +134,7 @@ export default function FounderApplicationsDashboard() {
     setProcessingId(appId);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/applications/${appId}/status`,
+        `https://startupforge-server-ten.vercel.app/api/applications/${appId}/status`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

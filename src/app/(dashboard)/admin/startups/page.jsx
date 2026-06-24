@@ -78,9 +78,12 @@ export default function AdminManageStartups() {
   useEffect(() => {
     const fetchEcosystemStartups = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/startups", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://startupforge-server-ten.vercel.app/api/admin/startups",
+          {
+            credentials: "include",
+          },
+        );
         const json = await res.json();
         if (res.ok && json.success) {
           setStartups(json.data);
@@ -105,7 +108,7 @@ export default function AdminManageStartups() {
     const updatedApprovalState = !currentApprovalState;
     try {
       const res = await fetch(
-        `http://localhost:5000/api/admin/startups/${targetId}/approve`,
+        `https://startupforge-server-ten.vercel.app/api/admin/startups/${targetId}/approve`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -157,7 +160,7 @@ export default function AdminManageStartups() {
     setActionId(targetId);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/admin/startups/${targetId}`,
+        `https://startupforge-server-ten.vercel.app/api/admin/startups/${targetId}`,
         {
           method: "DELETE",
           credentials: "include",

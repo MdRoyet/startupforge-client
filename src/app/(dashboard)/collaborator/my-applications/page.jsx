@@ -69,9 +69,12 @@ const MyApplications = () => {
   useEffect(() => {
     const fetchMyApplications = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/applications", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://startupforge-server-ten.vercel.app/api/applications",
+          {
+            credentials: "include",
+          },
+        );
         const json = await res.json();
 
         if (res.ok && json.success) {

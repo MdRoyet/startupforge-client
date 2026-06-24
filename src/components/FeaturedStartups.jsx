@@ -103,8 +103,8 @@ export default function FeaturedStartups() {
     const fetchEcosystemData = async () => {
       try {
         const [startupsRes, oppsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/startups"),
-          fetch("http://localhost:5000/api/opportunities"),
+          fetch("https://startupforge-server-ten.vercel.app/api/startups"),
+          fetch("https://startupforge-server-ten.vercel.app/api/opportunities"),
         ]);
 
         const startupsJson = await startupsRes.json();

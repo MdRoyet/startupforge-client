@@ -112,7 +112,7 @@ export default function FeaturedOpportunities() {
       setIsLoading(true);
       try {
         const res = await fetch(
-          `http://localhost:5000/api/opportunities?page=${currentPage}&limit=${itemsPerPage}`,
+          `https://startupforge-server-ten.vercel.app/api/opportunities?page=${currentPage}&limit=${itemsPerPage}`,
         );
         const json = await res.json();
 

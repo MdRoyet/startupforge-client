@@ -1,4 +1,6 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://startupforge-server-ten.vercel.app";
 
 export const syncJwtWithBackend = async () => {
   try {
@@ -15,6 +17,7 @@ export const syncJwtWithBackend = async () => {
 
     const response = await fetch(`${API_BASE}/api/auth/sync-token`, {
       method: "POST",
+
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: tokenResult.token }),

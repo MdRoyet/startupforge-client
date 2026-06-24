@@ -64,9 +64,12 @@ export default function AdminManageUsers() {
   useEffect(() => {
     const fetchEcosystemAccounts = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/users", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://startupforge-server-ten.vercel.app/api/admin/users",
+          {
+            credentials: "include",
+          },
+        );
         const json = await res.json();
         if (res.ok && json.success) {
           setUsers(json.data);
@@ -88,7 +91,7 @@ export default function AdminManageUsers() {
     const updatedBlockState = !currentBlockState;
     try {
       const res = await fetch(
-        `http://localhost:5000/api/admin/users/${targetId}/toggle-block`,
+        `https://startupforge-server-ten.vercel.app/api/admin/users/${targetId}/toggle-block`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

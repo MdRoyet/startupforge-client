@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<div align="center">
+  
+  <img src="https://img.shields.io/badge/Next.js-14-black?logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Express.js-4.18-black?logo=express&logoColor=white" alt="Express.js" />
+  <img src="https://img.shields.io/badge/MongoDB-5.0-success?logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Better_Auth-1.0-darkgray" alt="Better Auth" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-informational?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Framer_Motion-11-critical?logo=framer&logoColor=white" alt="Framer Motion" />
+  <img src="https://img.shields.io/badge/Stripe-Payments-blueviolet?logo=stripe&logoColor=white" alt="Stripe" />
 
-## Getting Started
+  <h1>🚀 StartupForge - Startup Team Builder Platform</h1>
 
-First, run the development server:
+  <p>A premium, full-stack platform where startup founders can publish ideas, build teams, and recruit collaborators. Developers, designers, and marketers can explore startup opportunities and apply to join cutting-edge projects.</p>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+  <p>
+    <strong><a href="#">Live Demo</a> • <a href="#">Client Repo</a> • <a href="#">Server Repo</a></strong>
+  </p>
+  
+</div>
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🌟 Overview
+StartupForge acts as a dynamic bridge between visionary founders and talented collaborators. Unlike traditional job boards, it focuses specifically on the startup ecosystem, featuring role-based dashboards, premium tier limitations, dynamic quota enforcement, and real-time application tracking.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ✨ Key Features
+* **🎨 Premium UI/UX:** Dark-mode glassmorphism design system built with Tailwind CSS, DaisyUI, and Framer Motion scroll/hover animations.
+* **🔐 Dual-Layer Authentication:** Seamless integration of Better Auth (Session Cookies) for frontend login, bridged securely to a custom Stateless JWT system (`startupforge_jwt`) for protected Express APIs.
+* **👥 Role-Based Dashboards:**
+  * **Founders:** Create startup profiles, post opportunities (with premium quota limits), review/accept/reject applicants.
+  * **Collaborators:** Browse opportunities, apply with portfolio links, track application statuses in real-time.
+  * **Admins:** Monitor total revenue, manage users (block/unblock), approve startup listings, view transaction logs.
+* **💳 Stripe Integration:** Premium tier upgrades for founders to unlock higher posting limits (Free: 10 posts vs Pro: 200 posts).
+* **🔍 Advanced Search & Filtering:** MongoDB `$regex` for searching by role/skills, and `$in` operators for filtering by Work Type and Industry.
+* **📄 Server-Side Pagination:** Cleanly paginated opportunity feeds to ensure fast loading times.
+* **☁️ Secure Media Hosting:** Direct integration with ImgBB API for handling logo and avatar uploads securely.
 
-## Learn More
+## 🛠 Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+| Category | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Frontend** | Next.js (App Router), JSX | Core React Framework & Routing |
+| **Styling** | Tailwind CSS, DaisyUI | Utility-first styling & Component Library |
+| **Animation** | Framer Motion | Scroll animations, page transitions, micro-interactions |
+| **Icons** | Inline SVGs (Gravity UI) | Zero-dependency, crisp vector icons |
+| **Notifications** | React-Toastify | Elegant pop-up alerts |
+| **Backend** | Node.js, Express.js | REST API Server |
+| **Database** | MongoDB (Native Driver) | NoSQL Data Storage |
+| **Auth (Frontend)** | Better Auth | Google OAuth & Email/Password Session Management |
+| **Auth (Backend)** | JSON Web Tokens (JWT) | Stateless API Protection via HTTPOnly Cookies |
+| **Payments** | Stripe | Checkout Sessions & Subscription Tiers |
+| **Media** | ImgBB API | Image Hosting |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🗂 Architecture & Folder Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The project follows a strict separation of concerns across two distinct repositories to optimize for serverless deployment.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Client (Next.js)
+```text
+src/
+├── app/
+│   ├── (public)/        # Home, Login, Register, Browse pages
+│   ├── (dashboard)/     # Protected layout wrapper
+│   │   ├── founder/     # Founder-specific pages
+│   │   └── collaborator/# Collaborator-specific pages
+│   ├── admin/           # Admin-specific pages
+│   └── layout.jsx       # Root layout (Navbar/Footer)
+├── components/
+│   ├── dashboard/       # Sidebar, Overview cards
+│   ├── home/            # FeaturedStartups, WhyJoin, Statistics, Testimonials
+│   └── layout/          # Navbar, Footer
+├── lib/
+│   ├── auth.js          # Better Auth client config
+│   └── authBridge.js    # JWT synchronization helper
+└── providers/
+    └── AuthProvider.jsx

@@ -1,6 +1,10 @@
 import Banner from "@/components/Banner";
 import FeaturedOpportunities from "@/components/FeaturedOpportunities";
 import FeaturedStartups from "@/components/FeaturedStartups";
+import StartupStatistics from "@/components/StartupStatistics";
+import SuccessStories from "@/components/SuccessStories";
+import Testimonials from "@/components/Testimonials";
+import WhyJoinSection from "@/components/WhyJoinSection";
 
 export default function Home() {
   return (
@@ -16,11 +20,13 @@ export default function Home() {
       {/* 3. Dynamic Section 2: Featured Opportunities */}
       <FeaturedOpportunities />
 
-      {/* 4. Additional Section 1: Success Stories or Stats */}
-      {/* <SuccessStories /> */}
+      <SuccessStories></SuccessStories>
 
-      {/* 5. Additional Section 2: Why Join Us */}
-      {/* <WhyJoin /> */}
+      <WhyJoinSection></WhyJoinSection>
+
+      <StartupStatistics></StartupStatistics>
+
+      <Testimonials></Testimonials>
     </div>
   );
 }

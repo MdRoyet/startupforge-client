@@ -260,7 +260,7 @@ export default function CreateStartup() {
         `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
         {
           method: "POST",
-          credentials: "include",
+          credentials: "omit",
 
           body: bodyData,
         },
